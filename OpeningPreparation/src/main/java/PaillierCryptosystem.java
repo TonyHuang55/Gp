@@ -1,4 +1,3 @@
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Random;
 
@@ -48,16 +47,13 @@ public class PaillierCryptosystem {
     private BigInteger[] sk;
 
     public static void main(String[] args) {
-        for (int i = 0; i < 10; i++) {
-            System.out.println("第" + i + "次：");
-            PaillierCryptosystem paillier = new PaillierCryptosystem();
-            BigInteger msg = new BigInteger("12345");
-            BigInteger c = paillier.Encryption(msg);
-            System.out.println(c);
-            BigInteger d = paillier.Decryption(c);
-            System.out.println(d);
-            System.out.println(d.equals(msg));
-        }
+        PaillierCryptosystem paillier = new PaillierCryptosystem();
+        BigInteger msg = new BigInteger("12345");
+        BigInteger c = paillier.Encryption(msg);
+        //System.out.println(c);
+        BigInteger d = paillier.Decryption(c);
+        //System.out.println(d);
+        System.out.println(d.equals(msg));
 
     }
 
@@ -67,6 +63,7 @@ public class PaillierCryptosystem {
      * @param bitLengthVal 位数
      * @param certainty    确定性
      */
+    @Deprecated
     public PaillierCryptosystem(int bitLengthVal, int certainty) {
         keyGeneration(bitLengthVal, certainty);
     }
@@ -88,8 +85,8 @@ public class PaillierCryptosystem {
         bitLength = bitLengthVal;
         // BigInteger(int bitLength ,int certainty ,Random rnd)
         // 生成 BigInteger 伪随机数，它可能是（概率不小于 1 - 1/2^certainty）一个具有指定 bitLength 的素数
-        p = new BigInteger(bitLength / 2, certainty, new Random());
-        q = new BigInteger(bitLength / 2, certainty, new Random());
+        p = new BigInteger(bitLength, certainty, new Random());
+        q = new BigInteger(bitLength, certainty, new Random());
 
         // 计算 p 和 q 的乘积 N 以及 N^2
         N = p.multiply(q);
@@ -100,12 +97,15 @@ public class PaillierCryptosystem {
                 .divide(p.subtract(BigInteger.ONE).gcd(q.subtract(BigInteger.ONE)));
 
         // 取满足条件的随机数 g
-        g = new BigInteger("2");
-        for (; g.compareTo(Nsquare) < 0; g = g.add(BigInteger.ONE)) {
-            // 计算 μ (求逆：modInverse)
-            μ = (g.modPow(λ, N.multiply(N)).subtract(BigInteger.ONE).divide(N)).modInverse(N);
-            if (g.modPow(λ, N.multiply(N)).subtract(BigInteger.ONE).divide(N).gcd(N).intValue() == 1) {
-                break;
+        while (true) {
+            // BigInteger(int numBits, Random rnd)
+            // 此构造函数用于构造一个随机生成的 BigInteger，范围在 0 到 (2^numBits - 1), 包括边界值
+            g = new BigInteger(bitLength, new Random());
+            if (g.compareTo(Nsquare) < 0 && g.gcd(Nsquare).intValue() == 1) {
+                μ = (g.modPow(λ, N.multiply(N)).subtract(BigInteger.ONE).divide(N)).modInverse(N);
+                if (g.modPow(λ, N.multiply(N)).subtract(BigInteger.ONE).divide(N).gcd(N).intValue() == 1) {
+                    break;
+                }
             }
         }
 
@@ -120,7 +120,9 @@ public class PaillierCryptosystem {
      * @param r 随机数 r
      * @return 密文
      */
+    @Deprecated
     public BigInteger Encryption(BigInteger m, BigInteger r) {
+        // c = g^m * r^N mod N^2
         return g.modPow(m, Nsquare).multiply(r.modPow(N, Nsquare)).mod(Nsquare);
     }
 
@@ -131,7 +133,14 @@ public class PaillierCryptosystem {
      * @return 密文
      */
     public BigInteger Encryption(BigInteger m) {
-        BigInteger r = new BigInteger(bitLength, new Random());
+        BigInteger r;
+        while (true) {
+            r = new BigInteger(bitLength, new Random());
+            if (r.compareTo(Nsquare) < 0 && r.gcd(Nsquare).intValue() == 1) {
+                break;
+            }
+        }
+        // c = g^m * r^N mod N^2
         return g.modPow(m, Nsquare).multiply(r.modPow(N, Nsquare)).mod(Nsquare);
     }
 
@@ -142,6 +151,7 @@ public class PaillierCryptosystem {
      * @return 明文
      */
     public BigInteger Decryption(BigInteger c) {
+        // L(c^λ mod N^2) * μ mod N
         return c.modPow(λ, Nsquare).subtract(BigInteger.ONE).divide(N).multiply(μ).mod(N);
     }
 }
