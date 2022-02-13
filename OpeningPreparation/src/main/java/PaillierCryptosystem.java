@@ -37,14 +37,14 @@ public class PaillierCryptosystem {
     /**
      * 模数位数
      */
-    private int bitLength;
+    private int bitLength = 512;
 
     /**
      * 公钥：pk
      * 私钥：sk
      */
-    private BigInteger[] pk;
-    private BigInteger[] sk;
+    public BigInteger[] pk;
+    public BigInteger[] sk;
 
     public static void main(String[] args) {
         PaillierCryptosystem paillier = new PaillierCryptosystem();
@@ -72,7 +72,7 @@ public class PaillierCryptosystem {
      * 无参构造，默认位数为：512，确定性为：64
      */
     public PaillierCryptosystem() {
-        keyGeneration(512, 64);
+        keyGeneration(bitLength, 64);
     }
 
     /**
@@ -102,8 +102,8 @@ public class PaillierCryptosystem {
             // 此构造函数用于构造一个随机生成的 BigInteger，范围在 0 到 (2^numBits - 1), 包括边界值
             g = new BigInteger(bitLength, new Random());
             if (g.compareTo(Nsquare) < 0 && g.gcd(Nsquare).intValue() == 1) {
-                μ = (g.modPow(λ, N.multiply(N)).subtract(BigInteger.ONE).divide(N)).modInverse(N);
-                if (g.modPow(λ, N.multiply(N)).subtract(BigInteger.ONE).divide(N).gcd(N).intValue() == 1) {
+                μ = (g.modPow(λ, Nsquare).subtract(BigInteger.ONE).divide(N)).modInverse(N);
+                if (g.modPow(λ, Nsquare).subtract(BigInteger.ONE).divide(N).gcd(N).intValue() == 1) {
                     break;
                 }
             }
@@ -153,5 +153,13 @@ public class PaillierCryptosystem {
     public BigInteger Decryption(BigInteger c) {
         // L(c^λ mod N^2) * μ mod N
         return c.modPow(λ, Nsquare).subtract(BigInteger.ONE).divide(N).multiply(μ).mod(N);
+    }
+
+    public BigInteger[] getPK() {
+        return pk;
+    }
+
+    public BigInteger[] getSK() {
+        return sk;
     }
 }
