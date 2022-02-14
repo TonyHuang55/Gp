@@ -1,6 +1,4 @@
-import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -9,9 +7,11 @@ public class SDAA {
     /**
      * security parameter
      */
-    private BigInteger κ;
+    private BigInteger κ=new BigInteger(1024, new Random());
 
-    private BigInteger k;
+    private BigInteger k=new BigInteger("2");
+
+    private BigInteger N, g, h, λ, μ;
 
     private PaillierCryptosystem paillierCryptosystem;
 
@@ -23,6 +23,16 @@ public class SDAA {
 
     private BigInteger[] SK;
 
+    private BigInteger[] SKDO;
+
+    private BigInteger[] x, r;
+
+    private BigInteger[] X;
+
+    private BigInteger χ = BigInteger.ZERO;
+
+    private BigInteger XSum = BigInteger.ZERO;
+
     private int bitLength = 512;
 
     /**
@@ -32,10 +42,10 @@ public class SDAA {
 
     public void keyGeneration() {
         paillierCryptosystem = new PaillierCryptosystem();
-        BigInteger N = paillierCryptosystem.getPK()[0];
-        BigInteger g = paillierCryptosystem.getPK()[1];
-        BigInteger μ = paillierCryptosystem.getSK()[0];
-        BigInteger λ = paillierCryptosystem.getSK()[1];
+        N = paillierCryptosystem.getPK()[0];
+        g = paillierCryptosystem.getPK()[1];
+        μ = paillierCryptosystem.getSK()[0];
+        λ = paillierCryptosystem.getSK()[1];
 
         while (true) {
             γ = new BigInteger(bitLength, new Random());
@@ -44,9 +54,11 @@ public class SDAA {
             }
         }
 
-        BigInteger h = g.modPow(γ, N.multiply(N));
+        h = g.modPow(γ, N.multiply(N));
 
         PP = new BigInteger[]{κ, N, g, h};
+
+        System.out.println("PP:"+Arrays.toString(PP));
 
         BigInteger[] splitN = split(N, m);
 
@@ -57,7 +69,62 @@ public class SDAA {
             }
         }
 
+        SKDO = new BigInteger[m];
+        for (int i = 0; i < m; i++) {
+            SKDO[i] = Rt.modPow(splitN[i], N.multiply(N));
+        }
+
         SK = new BigInteger[]{λ, μ, γ};
+
+        System.out.println("SK:"+Arrays.toString(SK));
+    }
+
+    public void getx() {
+        x = new BigInteger[m];
+        for (int i = 0; i < m; i++) {
+            while (true) {
+                x[i] = new BigInteger(bitLength, new Random());
+                if (Rt.compareTo(N) < 0 && Rt.gcd(N).intValue() == 1) {
+                    break;
+                }
+            }
+        }
+    }
+
+    public void getr() {
+        r = new BigInteger[m];
+        BigInteger halfκ = κ.divide(new BigInteger("2"));
+        for (int i = 0; i < m; i++) {
+            while (true) {
+                r[i] = new BigInteger(bitLength, new Random());
+                if (Rt.compareTo(halfκ) < 0 && Rt.gcd(halfκ).intValue() == 1) {
+                    break;
+                }
+            }
+        }
+    }
+
+    public void DataEncryption() {
+        getx();
+        getr();
+        X = new BigInteger[m];
+        for (int i = 0; i < m; i++) {
+            X[i] = g.modPow(x[i], N.multiply(N)).multiply(h.modPow(r[i], N.multiply(N))).multiply(SKDO[i]).mod(N.multiply(N));
+        }
+        System.out.println("[[X^(i)]]:"+Arrays.toString(X));
+    }
+
+    public void DataAggregation() {
+        for (BigInteger i : X) {
+            XSum = XSum.add(i.mod(N.multiply(N)));
+        }
+        XSum = XSum.mod(N.multiply(N));
+        System.out.println("[[X]]:"+XSum);
+    }
+
+    public void AggregatedResultDecryption() {
+        χ = XSum.modPow(λ, N.multiply(N)).multiply(μ).subtract(BigInteger.ONE).divide(N).mod(N).mod(γ);
+        System.out.println("χ:"+χ);
     }
 
     /**
@@ -86,7 +153,11 @@ public class SDAA {
 
 
     public static void main(String[] args) {
-
+        SDAA sdaa = new SDAA();
+        sdaa.keyGeneration();
+        sdaa.DataEncryption();
+        sdaa.DataAggregation();
+        sdaa.AggregatedResultDecryption();
     }
 
 }

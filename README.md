@@ -12,3 +12,8 @@
     * ``getting M random numbers whose sum is N`` 算法第一版实现
     * 完成改进版 ``Paillier`` 加密的 ``Key Generation``
     * **疑问：``Note that in Paillier cryptosystem, the order of g is a multiple of N, i.e., org(g) = kN, where k is an integer.``**
+* 2/14
+    * 添加工具类 ``BigIntegerUtils``
+    * 完成改进版 ``Paillier`` 加密的 ``Data Encryption``、``Data Aggregation`` 和 ``Aggregated Result Decryption``
+    * **疑问：g 是某个循环群 G 的生成元，它的阶是 kN 的话，g^kN = 1。如何计算 k ？**
+    * 学长建议：通常 Paillier 里面 g 取 n + 1 即可

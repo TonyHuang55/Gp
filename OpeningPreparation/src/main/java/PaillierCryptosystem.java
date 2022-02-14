@@ -1,3 +1,5 @@
+import Utils.BigIntegerUtils;
+
 import java.math.BigInteger;
 import java.util.Random;
 
@@ -43,8 +45,8 @@ public class PaillierCryptosystem {
      * 公钥：pk
      * 私钥：sk
      */
-    public BigInteger[] pk;
-    public BigInteger[] sk;
+    private BigInteger[] pk;
+    private BigInteger[] sk;
 
     public static void main(String[] args) {
         PaillierCryptosystem paillier = new PaillierCryptosystem();
@@ -81,33 +83,23 @@ public class PaillierCryptosystem {
      * @param bitLengthVal
      * @param certainty
      */
-    public void keyGeneration(int bitLengthVal, int certainty) {
-        bitLength = bitLengthVal;
+    private void keyGeneration(int bitLengthVal, int certainty) {
         // BigInteger(int bitLength ,int certainty ,Random rnd)
         // 生成 BigInteger 伪随机数，它可能是（概率不小于 1 - 1/2^certainty）一个具有指定 bitLength 的素数
-        p = new BigInteger(bitLength, certainty, new Random());
-        q = new BigInteger(bitLength, certainty, new Random());
+        p = new BigInteger(bitLengthVal, certainty, new Random());
+        q = new BigInteger(bitLengthVal, certainty, new Random());
 
         // 计算 p 和 q 的乘积 N 以及 N^2
         N = p.multiply(q);
-        Nsquare = N.multiply(N);
+        Nsquare = BigIntegerUtils.getSquare(N);
 
         // 计算 λ = lcm(p-1,q-1) = (p-1) * (q-1) / gcd(p-1, q-1)
-        λ = p.subtract(BigInteger.ONE).multiply(q.subtract(BigInteger.ONE))
-                .divide(p.subtract(BigInteger.ONE).gcd(q.subtract(BigInteger.ONE)));
+        λ = p.subtract(BigInteger.ONE).multiply(q.subtract(BigInteger.ONE)).divide(p.subtract(BigInteger.ONE).gcd(q.subtract(BigInteger.ONE)));
 
         // 取满足条件的随机数 g
-        while (true) {
-            // BigInteger(int numBits, Random rnd)
-            // 此构造函数用于构造一个随机生成的 BigInteger，范围在 0 到 (2^numBits - 1), 包括边界值
-            g = new BigInteger(bitLength, new Random());
-            if (g.compareTo(Nsquare) < 0 && g.gcd(Nsquare).intValue() == 1) {
-                μ = (g.modPow(λ, Nsquare).subtract(BigInteger.ONE).divide(N)).modInverse(N);
-                if (g.modPow(λ, Nsquare).subtract(BigInteger.ONE).divide(N).gcd(N).intValue() == 1) {
-                    break;
-                }
-            }
-        }
+        // 2/14 学长提示：通常 Paillier 中 g 取 n+1 即可
+        g = BigIntegerUtils.validRandomInResidueSystem(Nsquare);
+        μ = BigIntegerUtils.functionL(g.modPow(λ, Nsquare), N).modInverse(N);
 
         pk = new BigInteger[]{N, g};
         sk = new BigInteger[]{μ, λ};
@@ -133,13 +125,7 @@ public class PaillierCryptosystem {
      * @return 密文
      */
     public BigInteger Encryption(BigInteger m) {
-        BigInteger r;
-        while (true) {
-            r = new BigInteger(bitLength, new Random());
-            if (r.compareTo(Nsquare) < 0 && r.gcd(Nsquare).intValue() == 1) {
-                break;
-            }
-        }
+        BigInteger r = BigIntegerUtils.validRandomInResidueSystem(N);
         // c = g^m * r^N mod N^2
         return g.modPow(m, Nsquare).multiply(r.modPow(N, Nsquare)).mod(Nsquare);
     }
@@ -152,7 +138,7 @@ public class PaillierCryptosystem {
      */
     public BigInteger Decryption(BigInteger c) {
         // L(c^λ mod N^2) * μ mod N
-        return c.modPow(λ, Nsquare).subtract(BigInteger.ONE).divide(N).multiply(μ).mod(N);
+        return BigIntegerUtils.functionL(c.modPow(λ, Nsquare),N).multiply(μ).mod(N);
     }
 
     public BigInteger[] getPK() {
