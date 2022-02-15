@@ -37,9 +37,9 @@ public class PaillierCryptosystem {
     private BigInteger μ;
 
     /**
-     * 模数位数
+     * 准确度
      */
-    private int bitLength = 512;
+    private int certainty = 64;
 
     /**
      * 公钥：pk
@@ -49,32 +49,18 @@ public class PaillierCryptosystem {
     private BigInteger[] sk;
 
     public static void main(String[] args) {
-        PaillierCryptosystem paillier = new PaillierCryptosystem();
+        PaillierCryptosystem paillier = new PaillierCryptosystem(512);
         BigInteger msg = new BigInteger("12345");
         BigInteger c = paillier.Encryption(msg);
-        //System.out.println(c);
         BigInteger d = paillier.Decryption(c);
-        //System.out.println(d);
+//        System.out.println(c);
+//        System.out.println(d);
         System.out.println(d.equals(msg));
 
     }
 
-    /**
-     * 有参构造
-     *
-     * @param bitLengthVal 位数
-     * @param certainty    确定性
-     */
-    @Deprecated
-    public PaillierCryptosystem(int bitLengthVal, int certainty) {
-        keyGeneration(bitLengthVal, certainty);
-    }
-
-    /**
-     * 无参构造，默认位数为：512，确定性为：64
-     */
-    public PaillierCryptosystem() {
-        keyGeneration(bitLength, 64);
+    public PaillierCryptosystem(int λ) {
+        keyGeneration(λ, certainty);
     }
 
     /**
@@ -91,31 +77,19 @@ public class PaillierCryptosystem {
 
         // 计算 p 和 q 的乘积 N 以及 N^2
         N = p.multiply(q);
-        Nsquare = BigIntegerUtils.getSquare(N);
+        Nsquare = N.multiply(N);
 
         // 计算 λ = lcm(p-1,q-1) = (p-1) * (q-1) / gcd(p-1, q-1)
         λ = p.subtract(BigInteger.ONE).multiply(q.subtract(BigInteger.ONE)).divide(p.subtract(BigInteger.ONE).gcd(q.subtract(BigInteger.ONE)));
 
-        // 取满足条件的随机数 g
-        // 2/14 学长提示：通常 Paillier 中 g 取 n+1 即可
-        g = BigIntegerUtils.validRandomInResidueSystem(Nsquare);
+        // 这里 g 不取随机数，直接使用 N + 1 。此时对于这个群，g^kN=(N + 1)^kN = 1，k = 1
+        g = N.add(BigInteger.ONE);
         μ = BigIntegerUtils.functionL(g.modPow(λ, Nsquare), N).modInverse(N);
 
         pk = new BigInteger[]{N, g};
         sk = new BigInteger[]{μ, λ};
-    }
-
-    /**
-     * 加密
-     *
-     * @param m 明文
-     * @param r 随机数 r
-     * @return 密文
-     */
-    @Deprecated
-    public BigInteger Encryption(BigInteger m, BigInteger r) {
-        // c = g^m * r^N mod N^2
-        return g.modPow(m, Nsquare).multiply(r.modPow(N, Nsquare)).mod(Nsquare);
+//        System.out.println("pk:" + Arrays.toString(pk));
+//        System.out.println("sk:" + Arrays.toString(sk));
     }
 
     /**
@@ -138,7 +112,7 @@ public class PaillierCryptosystem {
      */
     public BigInteger Decryption(BigInteger c) {
         // L(c^λ mod N^2) * μ mod N
-        return BigIntegerUtils.functionL(c.modPow(λ, Nsquare),N).multiply(μ).mod(N);
+        return BigIntegerUtils.functionL(c.modPow(λ, Nsquare), N).multiply(μ).mod(N);
     }
 
     public BigInteger[] getPK() {

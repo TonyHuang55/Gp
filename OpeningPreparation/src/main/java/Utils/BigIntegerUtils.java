@@ -5,10 +5,6 @@ import java.util.Random;
 
 public class BigIntegerUtils {
 
-    public static BigInteger getSquare(BigInteger i) {
-        return i.multiply(i);
-    }
-
     /**
      * L(x) = (x - 1)/N
      */
