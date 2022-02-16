@@ -20,3 +20,5 @@
 * 2/15
     * 完成改进版 ``Paillier`` 加密（能跑）
     * ``Paillier`` 公钥中随机数 g 改为定值 N + 1 便于计算
+* 2/16
+    * 重构 ``SecureDataAggregationAlgorithm``，优化测试输出

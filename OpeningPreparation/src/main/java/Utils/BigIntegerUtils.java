@@ -3,6 +3,9 @@ package Utils;
 import java.math.BigInteger;
 import java.util.Random;
 
+/**
+ * @author Huang
+ */
 public class BigIntegerUtils {
 
     /**
@@ -17,12 +20,9 @@ public class BigIntegerUtils {
      */
     public static BigInteger validRandomInResidueSystem(BigInteger n){
         BigInteger res;
-        while (true) {
+        do {
             res = new BigInteger(n.bitLength(), new Random());
-            if (res.compareTo(n) < 0 && res.gcd(n).intValue() == 1) {
-                break;
-            }
-        }
+        } while (res.compareTo(n) >= 0 || res.gcd(n).intValue() != 1);
         return res;
     }
 }
