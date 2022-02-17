@@ -22,3 +22,5 @@
     * ``Paillier`` 公钥中随机数 g 改为定值 N + 1 便于计算
 * 2/16
     * 重构 ``SecureDataAggregationAlgorithm``，优化测试输出
+* 2/17
+    * 找参考论文，阅读开题报告和任务书模板
