@@ -41,3 +41,5 @@
     * translation
 * 3/1
     * translation
+* 3/2
+    * 完成 ``VANE`` 的第一遍精读，完成初步翻译
