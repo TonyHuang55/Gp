@@ -3,6 +3,7 @@ import org.junit.Test;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -55,5 +56,11 @@ public class test {
         for (int i = 1; i < size; i++) {
             System.out.println(records.get(i));
         }
+    }
+
+    @Test
+    public void dataSolveTest() throws IOException {
+        String path = "src/main/resources/database/winequality-red.csv";
+        DataSolve.dataRead(path);
     }
 }
