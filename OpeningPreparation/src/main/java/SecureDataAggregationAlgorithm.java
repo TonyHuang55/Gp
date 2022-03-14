@@ -1,6 +1,5 @@
 import Pojo.AdvancedPaillier;
 import Utils.BigIntegerUtils;
-import com.sun.org.apache.xerces.internal.impl.dv.xs.AnySimpleDV;
 
 import java.math.BigInteger;
 import java.util.Arrays;

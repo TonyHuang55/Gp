@@ -1,18 +1,48 @@
+import Pojo.AdvancedPaillier;
+import Pojo.CloudServiceProvider;
+import Pojo.DataOwner;
+import Pojo.TrustAuthority;
 import org.apache.commons.csv.*;
 import org.junit.Test;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 
 public class test {
     @Test
     public void test1() {
-        SecureDataAggregationAlgorithm algorithm = new SecureDataAggregationAlgorithm(512);
-        algorithm.total();
+        TrustAuthority ta = new TrustAuthority(512);
+        AdvancedPaillier ap = ta.getAP();
+        HashMap<String, BigInteger[]> map = ta.keyGenerate(3);
+
+        for (String s : map.keySet()) {
+            System.out.println(s + ":" + Arrays.toString(map.get(s)));
+        }
+
+        BigInteger[] sk_dos = map.get("SK_DO");
+
+        DataOwner do1 = new DataOwner(ap);
+        DataOwner do2 = new DataOwner(ap);
+        DataOwner do3 = new DataOwner(ap);
+        DataOwner[] dataOwners = {do1, do2, do3};
+
+        BigInteger[] X = new BigInteger[dataOwners.length];
+        for (int i = 0; i < dataOwners.length; i++) {
+            X[i] = dataOwners[i].DataEncryption(sk_dos[i]);
+        }
+
+        System.out.println(Arrays.toString(X));
+
+        CloudServiceProvider csp = new CloudServiceProvider(ap);
+        BigInteger XSum = csp.DataAggregation(X);
+        System.out.println(XSum);
+        BigInteger res = csp.AggregatedResultDecryption(XSum);
+        System.out.println(res);
     }
 
     @Test
@@ -61,6 +91,6 @@ public class test {
     @Test
     public void dataSolveTest() throws IOException {
         String path = "src/main/resources/database/winequality-red.csv";
-        DataSolve.dataRead(path);
+        DataSolve.dataNormalization(path);
     }
 }
