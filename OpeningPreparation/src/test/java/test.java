@@ -9,13 +9,14 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 public class test {
     @Test
-    public void test1() {
+    public void test1() throws IOException {
         TrustAuthority ta = new TrustAuthority(512);
         AdvancedPaillier ap = ta.getAP();
         HashMap<String, BigInteger[]> map = ta.keyGenerate(3);
@@ -43,6 +44,18 @@ public class test {
         System.out.println(XSum);
         BigInteger res = csp.AggregatedResultDecryption(XSum);
         System.out.println(res);
+
+        System.out.println("加密");
+
+        List<List[]> DOs = new ArrayList<>();
+        for (int i = 0; i < dataOwners.length; i++) {
+            List[] lists = dataOwners[i].dataNormalization("src/main/resources/database/winequality-red.csv");
+            DOs.add(lists);
+            System.out.println("DO" + i + ":" + Arrays.toString(lists));
+        }
+
+        List[] taList = ta.globalDataNormalization(DOs);
+        System.out.println(Arrays.toString(taList));
     }
 
     @Test
@@ -86,11 +99,5 @@ public class test {
         for (int i = 1; i < size; i++) {
             System.out.println(records.get(i));
         }
-    }
-
-    @Test
-    public void dataSolveTest() throws IOException {
-        String path = "src/main/resources/database/winequality-red.csv";
-        DataSolve.dataNormalization(path);
     }
 }

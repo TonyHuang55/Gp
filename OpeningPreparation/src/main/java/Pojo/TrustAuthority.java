@@ -1,11 +1,11 @@
 package Pojo;
 
 import Utils.BigIntegerUtils;
+import Utils.DataNormalizationUtils;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Random;
+import java.util.*;
 
 public class TrustAuthority {
     /**
@@ -15,7 +15,7 @@ public class TrustAuthority {
 
     public static AdvancedPaillier advancedPaillier;
 
-    public AdvancedPaillier getAP(){
+    public AdvancedPaillier getAP() {
         return advancedPaillier;
     }
 
@@ -25,10 +25,11 @@ public class TrustAuthority {
 
     /**
      * keyGenerate
-     * @param m     DOs 的数量
+     *
+     * @param m DOs 的数量
      * @return
      */
-    public HashMap<String, BigInteger[]> keyGenerate(int m){
+    public HashMap<String, BigInteger[]> keyGenerate(int m) {
         /**
          * security parameter
          */
@@ -93,8 +94,28 @@ public class TrustAuthority {
         }};
     }
 
+    public List[] globalDataNormalization(List<List[]> DOs) {
+        List<List<Double>> max = new ArrayList<>();
+        List<List<Double>> min = new ArrayList<>();
+        int n = 0;
+        for (List[] DO : DOs) {
+            max.add(DO[0]);
+            min.add(DO[1]);
+            n += Double.parseDouble(String.valueOf(DO[2].get(0)));
+        }
+        List<Double> maxFeature = DataNormalizationUtils.maxCalculate(max);
+        List<Double> minFeature = DataNormalizationUtils.minCalculate(min);
+        for (int i = 0; i < maxFeature.size(); i++) {
+            maxFeature.set(i, maxFeature.get(i) + BigDecimal.valueOf(new Random().nextDouble()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());
+            minFeature.set(i, minFeature.get(i) - BigDecimal.valueOf(new Random().nextDouble()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());
+        }
+
+        return new List[]{maxFeature, minFeature, Collections.singletonList(n)};
+    }
+
     /**
      * paillier 加密得到公钥和私钥
+     *
      * @param kapa
      * @param certainty
      */
