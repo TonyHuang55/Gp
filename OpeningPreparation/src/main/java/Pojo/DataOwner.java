@@ -20,6 +20,11 @@ public class DataOwner {
 
     protected static AdvancedPaillier advancedPaillier;
 
+    private List<CSVRecord> localRecords;
+
+    private List<List<Double>> localData;
+    private List<Double> localTarget;
+
     public DataOwner(AdvancedPaillier advancedPaillier) {
         DataOwner.advancedPaillier = advancedPaillier;
     }
@@ -42,6 +47,28 @@ public class DataOwner {
     }
 
     public List[] dataNormalization(String localURL) throws IOException {
+        read(localURL);
+
+        HashMap<List<Double>, Double> D = new LinkedHashMap<>();
+        for (int count = 1; count < localRecords.size(); count++) {
+            CSVRecord record = localRecords.get(count);
+            List<Double> featureVector = new ArrayList<>();
+            for (int d = 0; d < record.size() - 1; d++) {
+                featureVector.add(Double.valueOf(record.get(d)));
+            }
+
+            D.put(featureVector, Double.valueOf(record.get(record.size() - 1)));
+        }
+
+        localData = new ArrayList<>(D.keySet());
+        localTarget = new ArrayList<>(D.values());
+        List<Double> maxFeature = DataNormalizationUtils.maxCalculate(localData);
+        List<Double> minFeature = DataNormalizationUtils.minCalculate(localData);
+
+        return new List[]{maxFeature, minFeature, Collections.singletonList((localRecords.size() - 1))};
+    }
+
+    private void read(String localURL) throws IOException {
         // 1.配置数据路径，读取数据文件
         FileReader fileReader = new FileReader(localURL);
         // 2.读取 csv 文件第一行标题
@@ -55,24 +82,18 @@ public class DataOwner {
         CSVFormat format = CSVFormat.EXCEL.withHeader(headers).withDelimiter(';');
         // 4.读取数据
         CSVParser parser = new CSVParser(fileReader, format);
-        List<CSVRecord> records = parser.getRecords();
+        localRecords = parser.getRecords();
+    }
 
-        // 5.分离特征向量和目标变量
-
-        HashMap<List<Double>, Double> D = new LinkedHashMap<>();
-        for (int count = 1; count < records.size(); count++) {
-            CSVRecord record = records.get(count);
-            List<Double> featureVector = new ArrayList<>();
-            for (int d = 0; d < record.size()-1; d++) {
-                featureVector.add(Double.valueOf(record.get(d)));
+    public void localDatasetNormalize(List<Double> max, List<Double> min) {
+        for (int i = 0; i < localData.size(); i++) {
+            List<Double> list = localData.get(i);
+            for (int j = 0; j < list.size(); j++) {
+                list.set(j, (list.get(j) - min.get(j)) / (max.get(j) - min.get(j)));
             }
-            D.put(featureVector, Double.valueOf(record.get(record.size() - 1)));
         }
-
-        List<List<Double>> lists = new ArrayList<>(D.keySet());
-        List<Double> maxFeature = DataNormalizationUtils.maxCalculate(lists);
-        List<Double> minFeature = DataNormalizationUtils.minCalculate(lists);
-
-        return new List[]{maxFeature, minFeature, Collections.singletonList((records.size() - 1))};
+//        for (List<Double> localDatum : localData) {
+//            System.out.println(localDatum);
+//        }
     }
 }

@@ -56,6 +56,12 @@ public class test {
 
         List[] taList = ta.globalDataNormalization(DOs);
         System.out.println(Arrays.toString(taList));
+
+        dataOwners[0].localDatasetNormalize(taList[0],taList[1]);
+
+        System.out.println("数据归一化");
+
+
     }
 
     @Test
