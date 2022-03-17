@@ -1,6 +1,6 @@
-import Pojo.AdvancedPaillier;
 import Pojo.CloudServiceProvider;
 import Pojo.DataOwner;
+import Pojo.Keys.Keys;
 import Pojo.TrustAuthority;
 import org.apache.commons.csv.*;
 import org.junit.Test;
@@ -17,35 +17,24 @@ import java.util.List;
 public class test {
     @Test
     public void test1() throws IOException {
-        TrustAuthority ta = new TrustAuthority(512);
-        AdvancedPaillier ap = ta.getAP();
-        HashMap<String, BigInteger[]> map = ta.keyGenerate(3);
+        System.out.println("System Initialization:");
+        System.out.println("Step1:System Parameters and Keys Distribution:");
+        TrustAuthority ta = new TrustAuthority();
+        // keyGenerate 后得到 PP、SK_DO 和 SK_CSP
+        HashMap<String, Keys[]> keyGenerate = ta.keyGenerate(3);
 
-        for (String s : map.keySet()) {
-            System.out.println(s + ":" + Arrays.toString(map.get(s)));
+        System.out.println("public parameters and secret keys for DOs and CSP");
+        for (String s : keyGenerate.keySet()) {
+            System.out.println(s + ":" + Arrays.toString(keyGenerate.get(s)));
         }
+        System.out.println("=============================================");
 
-        BigInteger[] sk_dos = map.get("SK_DO");
-
-        DataOwner do1 = new DataOwner(ap);
-        DataOwner do2 = new DataOwner(ap);
-        DataOwner do3 = new DataOwner(ap);
+        System.out.println("Data Normalization:");
+        Keys[] sk_dos = keyGenerate.get("SK_DO");
+        DataOwner do1 = new DataOwner();
+        DataOwner do2 = new DataOwner();
+        DataOwner do3 = new DataOwner();
         DataOwner[] dataOwners = {do1, do2, do3};
-
-        BigInteger[] X = new BigInteger[dataOwners.length];
-        for (int i = 0; i < dataOwners.length; i++) {
-            X[i] = dataOwners[i].DataEncryption(sk_dos[i]);
-        }
-
-        System.out.println(Arrays.toString(X));
-
-        CloudServiceProvider csp = new CloudServiceProvider(ap);
-        BigInteger XSum = csp.DataAggregation(X);
-        System.out.println(XSum);
-        BigInteger res = csp.AggregatedResultDecryption(XSum);
-        System.out.println(res);
-
-        System.out.println("加密");
 
         List<List[]> DOs = new ArrayList<>();
         for (int i = 0; i < dataOwners.length; i++) {
@@ -54,14 +43,10 @@ public class test {
             System.out.println("DO" + i + ":" + Arrays.toString(lists));
         }
 
-        List[] taList = ta.globalDataNormalization(DOs);
-        System.out.println(Arrays.toString(taList));
+        List[] globalMaxMin = ta.globalDataNormalization(DOs);
+        System.out.println(Arrays.toString(globalMaxMin));
 
-        dataOwners[0].localDatasetNormalize(taList[0],taList[1]);
-
-        System.out.println("数据归一化");
-
-
+        dataOwners[0].localDatasetNormalize(globalMaxMin[0],globalMaxMin[1]);
     }
 
     @Test

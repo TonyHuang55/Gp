@@ -1,6 +1,5 @@
 package Pojo;
 
-import Utils.BigIntegerUtils;
 import Utils.DataNormalizationUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -9,7 +8,6 @@ import org.apache.commons.csv.CSVRecord;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.*;
 
 public class DataOwner {
@@ -17,55 +15,34 @@ public class DataOwner {
      * 准确度
      */
     private final static int certainty = 64;
+    private final static int kapa = 512;
 
-    protected static AdvancedPaillier advancedPaillier;
-
-    private List<CSVRecord> localRecords;
-
-    private List<List<Double>> localData;
-    private List<Double> localTarget;
-
-    public DataOwner(AdvancedPaillier advancedPaillier) {
-        DataOwner.advancedPaillier = advancedPaillier;
-    }
-
-    public BigInteger DataEncryption(BigInteger SK_DO) {
-        BigInteger N = advancedPaillier.getN(), g = advancedPaillier.getG(), h = advancedPaillier.getH();
-        BigInteger x = getRandomX(N);
-        BigInteger r = getRandomR(advancedPaillier.getKapa());
-        return g.modPow(x, N.multiply(N)).multiply(h.modPow(r, N.multiply(N))).multiply(SK_DO).mod(N.multiply(N));
-    }
-
-    private static BigInteger getRandomX(BigInteger N) {
-        // a private message of DO_i
-        return BigIntegerUtils.validRandomInResidueSystem(N);
-    }
-
-    private static BigInteger getRandomR(int kapa) {
-        // a random number which satisfies |r_i| < κ/2
-        return new BigInteger(kapa / 2, certainty, new Random());
-    }
+    private List<CSVRecord> totalData;
+    private List<List<Double>> featureVector;
+    private List<Double> targetVariable;
 
     public List[] dataNormalization(String localURL) throws IOException {
         read(localURL);
 
         HashMap<List<Double>, Double> D = new LinkedHashMap<>();
-        for (int count = 1; count < localRecords.size(); count++) {
-            CSVRecord record = localRecords.get(count);
+        // 排除 head，从实际数据开始记录
+        for (int count = 1; count < totalData.size(); count++) {
+            CSVRecord record = totalData.get(count);
             List<Double> featureVector = new ArrayList<>();
+            // 排除目标向量 y
             for (int d = 0; d < record.size() - 1; d++) {
                 featureVector.add(Double.valueOf(record.get(d)));
             }
-
+            // 存入键值对为：(特征向量,目标向量)
             D.put(featureVector, Double.valueOf(record.get(record.size() - 1)));
         }
 
-        localData = new ArrayList<>(D.keySet());
-        localTarget = new ArrayList<>(D.values());
-        List<Double> maxFeature = DataNormalizationUtils.maxCalculate(localData);
-        List<Double> minFeature = DataNormalizationUtils.minCalculate(localData);
+        featureVector = new ArrayList<>(D.keySet());
+        targetVariable = new ArrayList<>(D.values());
+        List<Double> maxFeature = DataNormalizationUtils.maxCalculate(featureVector);
+        List<Double> minFeature = DataNormalizationUtils.minCalculate(featureVector);
 
-        return new List[]{maxFeature, minFeature, Collections.singletonList((localRecords.size() - 1))};
+        return new List[]{maxFeature, minFeature, Collections.singletonList((totalData.size() - 1))};
     }
 
     private void read(String localURL) throws IOException {
@@ -82,12 +59,12 @@ public class DataOwner {
         CSVFormat format = CSVFormat.EXCEL.withHeader(headers).withDelimiter(';');
         // 4.读取数据
         CSVParser parser = new CSVParser(fileReader, format);
-        localRecords = parser.getRecords();
+        totalData = parser.getRecords();
     }
 
     public void localDatasetNormalize(List<Double> max, List<Double> min) {
-        for (int i = 0; i < localData.size(); i++) {
-            List<Double> list = localData.get(i);
+        for (int i = 0; i < featureVector.size(); i++) {
+            List<Double> list = featureVector.get(i);
             for (int j = 0; j < list.size(); j++) {
                 list.set(j, (list.get(j) - min.get(j)) / (max.get(j) - min.get(j)));
             }
