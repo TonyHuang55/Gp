@@ -1,4 +1,3 @@
-import Pojo.CloudServiceProvider;
 import Pojo.DataOwner;
 import Pojo.Keys.Keys;
 import Pojo.TrustAuthority;
@@ -8,7 +7,6 @@ import org.junit.Test;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -46,7 +44,10 @@ public class test {
         List[] globalMaxMin = ta.globalDataNormalization(DOs);
         System.out.println(Arrays.toString(globalMaxMin));
 
-        dataOwners[0].localDatasetNormalize(globalMaxMin[0],globalMaxMin[1]);
+        dataOwners[0].localFeatureVectorNormalize(globalMaxMin[0], globalMaxMin[1]);
+
+
+        dataOwners[0].dataPreprocessing();
     }
 
     @Test
@@ -89,6 +90,54 @@ public class test {
         int size = records.size();
         for (int i = 1; i < size; i++) {
             System.out.println(records.get(i));
+        }
+    }
+
+    @Test
+    public void dataPreprocessingTest() {
+        List<List<Double>> featureVector = new ArrayList<List<Double>>() {{
+            add(Arrays.asList(new Double[]{1.0, 2.0, 3.0, 4.0, 5.0}));
+            add(Arrays.asList(new Double[]{1.0, 2.0, 3.0, 4.0, 5.0}));
+//            add(Arrays.asList(new Double[]{6.0, 7.0, 8.0, 9.0, 10.0}));
+//            add(Arrays.asList(new Double[]{11.0, 12.0, 13.0, 14.0, 15.0}));
+//            add(Arrays.asList(new Double[]{16.0, 17.0, 18.0, 19.0, 20.0}));
+//            add(Arrays.asList(new Double[]{21.0, 22.0, 23.0, 24.0, 25.0}));
+        }};
+        List<Double> targetVariable = Arrays.asList(new Double[]{1.0, 2.0, 3.0, 4.0, 5.0});
+
+        int d = featureVector.get(0).size();
+        // 初始化
+        Double[][] M = new Double[d + 1][d + 1];
+        for (int i = 0; i <= d; i++) {
+            for (int j = 0; j <= d; j++) {
+                M[i][j] = 0.0;
+            }
+        }
+        // 分成四个区块进行赋值计算
+        for (int n = 0; n < featureVector.size(); n++) {
+            // 第一行
+            for (int j = 0; j <= d - 1; j++) {
+                M[0][j] += featureVector.get(n).get(j);
+            }
+            // 第一行的第 d 列
+            M[0][d] += targetVariable.get(n);
+            // 第二行到第 d 行
+            for (int i = 1; i <= d; i++) {
+                for (int j = 0; j <= d - 1; j++) {
+                    M[i][j] += featureVector.get(n).get(j) * featureVector.get(n).get(i - 1);
+                }
+            }
+            // 第二行到第 d 行的第 d 列
+            for (int i = 1; i <= d; i++) {
+                M[i][d] += targetVariable.get(n) * featureVector.get(n).get(i - 1);
+            }
+        }
+
+        for (int i = 0; i <= d; i++) {
+            for (int j = 0; j <= d; j++) {
+                System.out.print(M[i][j] + " ");
+            }
+            System.out.println();
         }
     }
 }

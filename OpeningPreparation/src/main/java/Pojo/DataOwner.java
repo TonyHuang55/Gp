@@ -20,6 +20,7 @@ public class DataOwner {
     private List<CSVRecord> totalData;
     private List<List<Double>> featureVector;
     private List<Double> targetVariable;
+    private Double[][] M;
 
     public List[] dataNormalization(String localURL) throws IOException {
         read(localURL);
@@ -62,15 +63,46 @@ public class DataOwner {
         totalData = parser.getRecords();
     }
 
-    public void localDatasetNormalize(List<Double> max, List<Double> min) {
+    public void localFeatureVectorNormalize(List<Double> max, List<Double> min) {
         for (int i = 0; i < featureVector.size(); i++) {
             List<Double> list = featureVector.get(i);
             for (int j = 0; j < list.size(); j++) {
                 list.set(j, (list.get(j) - min.get(j)) / (max.get(j) - min.get(j)));
             }
         }
-//        for (List<Double> localDatum : localData) {
-//            System.out.println(localDatum);
-//        }
+    }
+
+    public void dataPreprocessing() {
+        int d = featureVector.get(0).size();
+        // 初始化
+        M = new Double[d + 1][d + 1];
+        for (int i = 0; i <= d; i++) {
+            for (int j = 0; j <= d; j++) {
+                M[i][j] = 0.0;
+            }
+        }
+        // 分成四个区块进行赋值计算
+        for (int n = 0; n < featureVector.size(); n++) {
+            // 第一行
+            for (int j = 0; j <= d - 1; j++) {
+                M[0][j] += featureVector.get(n).get(j);
+            }
+            // 第一行的第 d 列
+            M[0][d] += targetVariable.get(n);
+            // 第二行到第 d 行
+            for (int i = 1; i <= d; i++) {
+                for (int j = 0; j <= d - 1; j++) {
+                    M[i][j] += featureVector.get(n).get(j) * featureVector.get(n).get(i - 1);
+                }
+            }
+            // 第二行到第 d 行的第 d 列
+            for (int i = 1; i <= d; i++) {
+                M[i][d] += targetVariable.get(n) * featureVector.get(n).get(i - 1);
+            }
+        }
+    }
+
+    public void localTrainingDataEncryption(){
+
     }
 }
