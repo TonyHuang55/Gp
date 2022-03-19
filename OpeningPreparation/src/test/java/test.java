@@ -1,5 +1,6 @@
 import Pojo.DataOwner;
 import Pojo.Keys.Keys;
+import Pojo.Keys.PublicParameters;
 import Pojo.TrustAuthority;
 import org.apache.commons.csv.*;
 import org.junit.Test;
@@ -7,6 +8,7 @@ import org.junit.Test;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -28,6 +30,7 @@ public class test {
         System.out.println("=============================================");
 
         System.out.println("Data Normalization:");
+        Keys[] pp = keyGenerate.get("PP");
         Keys[] sk_dos = keyGenerate.get("SK_DO");
         DataOwner do1 = new DataOwner();
         DataOwner do2 = new DataOwner();
@@ -48,6 +51,9 @@ public class test {
 
 
         dataOwners[0].dataPreprocessing();
+
+        BigInteger[][] res = dataOwners[0].localTrainingDataEncryption((PublicParameters) pp[0]);
+        System.out.println(Arrays.deepToString(res));
     }
 
     @Test

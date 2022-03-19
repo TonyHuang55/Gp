@@ -1,6 +1,8 @@
 package Pojo;
 
+import Pojo.Keys.PublicParameters;
 import Utils.DataNormalizationUtils;
+import Utils.PaillierCryptosystemUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -8,6 +10,7 @@ import org.apache.commons.csv.CSVRecord;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.*;
 
 public class DataOwner {
@@ -25,21 +28,20 @@ public class DataOwner {
     public List[] dataNormalization(String localURL) throws IOException {
         read(localURL);
 
-        HashMap<List<Double>, Double> D = new LinkedHashMap<>();
+        featureVector = new ArrayList<>();
+        targetVariable = new ArrayList<>();
         // 排除 head，从实际数据开始记录
         for (int count = 1; count < totalData.size(); count++) {
             CSVRecord record = totalData.get(count);
-            List<Double> featureVector = new ArrayList<>();
+            List<Double> fv = new ArrayList<>();
             // 排除目标向量 y
             for (int d = 0; d < record.size() - 1; d++) {
-                featureVector.add(Double.valueOf(record.get(d)));
+                fv.add(Double.valueOf(record.get(d)));
             }
-            // 存入键值对为：(特征向量,目标向量)
-            D.put(featureVector, Double.valueOf(record.get(record.size() - 1)));
+            featureVector.add(fv);
+            targetVariable.add(Double.valueOf(record.get(record.size() - 1)));
         }
 
-        featureVector = new ArrayList<>(D.keySet());
-        targetVariable = new ArrayList<>(D.values());
         List<Double> maxFeature = DataNormalizationUtils.maxCalculate(featureVector);
         List<Double> minFeature = DataNormalizationUtils.minCalculate(featureVector);
 
@@ -102,7 +104,17 @@ public class DataOwner {
         }
     }
 
-    public void localTrainingDataEncryption(){
-
+    public BigInteger[][]
+    localTrainingDataEncryption(PublicParameters pp) {
+        int d = M.length - 1;
+        BigInteger[][] Mi = new BigInteger[M.length][M.length];
+        for (int i = 0; i <= d; i++) {
+            for (int j = 0; j <= d; j++) {
+                String integer = String.valueOf(Math.floor(M[i][j] * 1000));
+                BigInteger m = new BigInteger(integer.substring(0, integer.length() - 2));
+                Mi[i][j] = PaillierCryptosystemUtils.Encryption(m, pp);
+            }
+        }
+        return Mi;
     }
 }

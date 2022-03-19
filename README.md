@@ -69,5 +69,7 @@
     * 设计本地数据矩阵计算
 * 3/17
     * 小重构
-*3/18
+* 3/18
     * DO 部分 dataPreprocessing 实现（附带有单独测试用例并通过 & 复杂度尚未测试，可能可以进一步优化）
+* 3/19
+    * ``VANE`` 的 4.3.2 Local training data generation and encryption 实现
