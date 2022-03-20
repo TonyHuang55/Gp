@@ -73,3 +73,5 @@
     * DO 部分 dataPreprocessing 实现（附带有单独测试用例并通过 & 复杂度尚未测试，可能可以进一步优化）
 * 3/19
     * ``VANE`` 的 4.3.2 Local training data generation and encryption 实现
+* 3/20
+    * ``VANE`` 的 4.3.3 Local training data aggregation 的 step1 实现（既隐私保护加解密全部实现）

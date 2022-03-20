@@ -1,8 +1,10 @@
 package Pojo;
 
 import Pojo.Keys.PublicParameters;
+import Pojo.Keys.SK_DO;
 import Utils.DataNormalizationUtils;
 import Utils.PaillierCryptosystemUtils;
+import Utils.SecureDataAggregationAlgorithmUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -104,15 +106,14 @@ public class DataOwner {
         }
     }
 
-    public BigInteger[][]
-    localTrainingDataEncryption(PublicParameters pp) {
+    public BigInteger[][] localTrainingDataEncryption(PublicParameters pp, SK_DO sk_do) {
         int d = M.length - 1;
         BigInteger[][] Mi = new BigInteger[M.length][M.length];
         for (int i = 0; i <= d; i++) {
             for (int j = 0; j <= d; j++) {
                 String integer = String.valueOf(Math.floor(M[i][j] * 1000));
                 BigInteger m = new BigInteger(integer.substring(0, integer.length() - 2));
-                Mi[i][j] = PaillierCryptosystemUtils.Encryption(m, pp);
+                Mi[i][j] = SecureDataAggregationAlgorithmUtils.DataEncryption(m, pp, sk_do);
             }
         }
         return Mi;

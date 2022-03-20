@@ -1,6 +1,9 @@
+import Pojo.CloudServiceProvider;
 import Pojo.DataOwner;
 import Pojo.Keys.Keys;
 import Pojo.Keys.PublicParameters;
+import Pojo.Keys.SK_CSP;
+import Pojo.Keys.SK_DO;
 import Pojo.TrustAuthority;
 import org.apache.commons.csv.*;
 import org.junit.Test;
@@ -32,6 +35,7 @@ public class test {
         System.out.println("Data Normalization:");
         Keys[] pp = keyGenerate.get("PP");
         Keys[] sk_dos = keyGenerate.get("SK_DO");
+        Keys[] sk_csp = keyGenerate.get("SK_CSP");
         DataOwner do1 = new DataOwner();
         DataOwner do2 = new DataOwner();
         DataOwner do3 = new DataOwner();
@@ -48,11 +52,27 @@ public class test {
         System.out.println(Arrays.toString(globalMaxMin));
 
         dataOwners[0].localFeatureVectorNormalize(globalMaxMin[0], globalMaxMin[1]);
-
+        dataOwners[1].localFeatureVectorNormalize(globalMaxMin[0], globalMaxMin[1]);
+        dataOwners[2].localFeatureVectorNormalize(globalMaxMin[0], globalMaxMin[1]);
 
         dataOwners[0].dataPreprocessing();
+        dataOwners[1].dataPreprocessing();
+        dataOwners[2].dataPreprocessing();
 
-        BigInteger[][] res = dataOwners[0].localTrainingDataEncryption((PublicParameters) pp[0]);
+        BigInteger[][] res1 = dataOwners[0].localTrainingDataEncryption((PublicParameters) pp[0],(SK_DO)sk_dos[0]);
+        BigInteger[][] res2 = dataOwners[1].localTrainingDataEncryption((PublicParameters) pp[0],(SK_DO)sk_dos[1]);
+        BigInteger[][] res3 = dataOwners[2].localTrainingDataEncryption((PublicParameters) pp[0],(SK_DO)sk_dos[2]);
+
+        List list = new ArrayList<BigInteger[][]>() {
+            {
+                add(res1);
+                add(res2);
+                add(res3);
+            }
+        };
+
+        CloudServiceProvider csp = new CloudServiceProvider();
+        BigInteger[][] res = csp.localTrainingDataAggregation(list, (PublicParameters) pp[0], (SK_CSP) sk_csp[0]);
         System.out.println(Arrays.deepToString(res));
     }
 
