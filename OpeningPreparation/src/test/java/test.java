@@ -5,6 +5,7 @@ import Pojo.Keys.PublicParameters;
 import Pojo.Keys.SK_CSP;
 import Pojo.Keys.SK_DO;
 import Pojo.TrustAuthority;
+import Utils.LinearRegressionUtils;
 import org.apache.commons.csv.*;
 import org.junit.Test;
 
@@ -24,7 +25,7 @@ public class test {
         System.out.println("Step1:System Parameters and Keys Distribution:");
         TrustAuthority ta = new TrustAuthority();
         // keyGenerate 后得到 PP、SK_DO 和 SK_CSP
-        HashMap<String, Keys[]> keyGenerate = ta.keyGenerate(3);
+        HashMap<String, Keys[]> keyGenerate = ta.keyGenerate(2);
 
         System.out.println("public parameters and secret keys for DOs and CSP");
         for (String s : keyGenerate.keySet()) {
@@ -38,42 +39,43 @@ public class test {
         Keys[] sk_csp = keyGenerate.get("SK_CSP");
         DataOwner do1 = new DataOwner();
         DataOwner do2 = new DataOwner();
-        DataOwner do3 = new DataOwner();
-        DataOwner[] dataOwners = {do1, do2, do3};
+        DataOwner[] dataOwners = {do1, do2};
 
         List<List[]> DOs = new ArrayList<>();
-        for (int i = 0; i < dataOwners.length; i++) {
-            List[] lists = dataOwners[i].dataNormalization("src/main/resources/database/winequality-red.csv");
-            DOs.add(lists);
-            System.out.println("DO" + i + ":" + Arrays.toString(lists));
-        }
+//        for (int i = 0; i < dataOwners.length; i++) {
+//            List[] lists = dataOwners[i].dataNormalization("src/main/resources/database/winequality-red.csv");
+//            DOs.add(lists);
+//            System.out.println("DO" + i + ":" + Arrays.toString(lists));
+//        }
+
+        List[] list1 = dataOwners[0].dataNormalization("src/main/resources/database/winequality-red1.csv");
+        List[] list2 = dataOwners[1].dataNormalization("src/main/resources/database/winequality-red2.csv");
+        DOs.add(list1);
+        DOs.add(list2);
 
         List[] globalMaxMin = ta.globalDataNormalization(DOs);
         System.out.println(Arrays.toString(globalMaxMin));
 
         dataOwners[0].localFeatureVectorNormalize(globalMaxMin[0], globalMaxMin[1]);
         dataOwners[1].localFeatureVectorNormalize(globalMaxMin[0], globalMaxMin[1]);
-        dataOwners[2].localFeatureVectorNormalize(globalMaxMin[0], globalMaxMin[1]);
 
         dataOwners[0].dataPreprocessing();
         dataOwners[1].dataPreprocessing();
-        dataOwners[2].dataPreprocessing();
 
-        BigInteger[][] res1 = dataOwners[0].localTrainingDataEncryption((PublicParameters) pp[0],(SK_DO)sk_dos[0]);
-        BigInteger[][] res2 = dataOwners[1].localTrainingDataEncryption((PublicParameters) pp[0],(SK_DO)sk_dos[1]);
-        BigInteger[][] res3 = dataOwners[2].localTrainingDataEncryption((PublicParameters) pp[0],(SK_DO)sk_dos[2]);
+        BigInteger[][] res1 = dataOwners[0].localTrainingDataEncryption((PublicParameters) pp[0], (SK_DO) sk_dos[0]);
+        BigInteger[][] res2 = dataOwners[1].localTrainingDataEncryption((PublicParameters) pp[0], (SK_DO) sk_dos[1]);
 
         List list = new ArrayList<BigInteger[][]>() {
             {
                 add(res1);
                 add(res2);
-                add(res3);
             }
         };
 
         CloudServiceProvider csp = new CloudServiceProvider();
         BigInteger[][] res = csp.localTrainingDataAggregation(list, (PublicParameters) pp[0], (SK_CSP) sk_csp[0]);
         System.out.println(Arrays.deepToString(res));
+        LinearRegressionUtils.LR(res);
     }
 
     @Test

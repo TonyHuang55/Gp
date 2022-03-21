@@ -75,3 +75,5 @@
     * ``VANE`` 的 4.3.2 Local training data generation and encryption 实现
 * 3/20
     * ``VANE`` 的 4.3.3 Local training data aggregation 的 step1 实现（既隐私保护加解密全部实现）
+* 3/21
+    * 测试隐私保护加解密（bug 待修改）

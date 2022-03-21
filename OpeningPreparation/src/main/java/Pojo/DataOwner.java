@@ -3,7 +3,6 @@ package Pojo;
 import Pojo.Keys.PublicParameters;
 import Pojo.Keys.SK_DO;
 import Utils.DataNormalizationUtils;
-import Utils.PaillierCryptosystemUtils;
 import Utils.SecureDataAggregationAlgorithmUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -16,12 +15,6 @@ import java.math.BigInteger;
 import java.util.*;
 
 public class DataOwner {
-    /**
-     * 准确度
-     */
-    private final static int certainty = 64;
-    private final static int kapa = 512;
-
     private List<CSVRecord> totalData;
     private List<List<Double>> featureVector;
     private List<Double> targetVariable;

@@ -16,7 +16,7 @@ public class TrustAuthority {
      * 准确度
      */
     private final static int certainty = 64;
-    private final static int kapa = 512;
+    private final static int kapa = 16;
 
     /**
      * keyGenerate
@@ -72,9 +72,9 @@ public class TrustAuthority {
 
 
         return new HashMap<String, Keys[]>() {{
-            put("PP", new Keys[]{PP});
+            put("PP", new PublicParameters[]{PP});
             put("SK_DO", SK_DOi);
-            put("SK_CSP", new Keys[]{SK_CSP});
+            put("SK_CSP", new SK_CSP[]{SK_CSP});
         }};
     }
 
