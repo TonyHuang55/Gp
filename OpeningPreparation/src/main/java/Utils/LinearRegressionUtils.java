@@ -5,7 +5,7 @@ import java.math.BigInteger;
 
 public class LinearRegressionUtils {
     public static void LR(BigInteger[][] M) {
-        BigDecimal learning_rate = new BigDecimal("0.01");
+        BigDecimal learning_rate = new BigDecimal("0.001");
         BigDecimal a = new BigDecimal("0"),
                 a0 = new BigDecimal("0"),
                 a1 = new BigDecimal("0"),
@@ -19,7 +19,7 @@ public class LinearRegressionUtils {
                 a9 = new BigDecimal("0"),
                 a10 = new BigDecimal("0");
 
-        int iterator = 1000;
+        int iterator = 500;
         for (int i = 0; i < iterator; i++) {
             BigDecimal gradient_a = new BigDecimal("0");
             BigDecimal gradient_a0 = new BigDecimal("0");

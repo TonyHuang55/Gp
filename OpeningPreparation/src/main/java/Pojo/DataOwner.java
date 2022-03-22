@@ -99,6 +99,10 @@ public class DataOwner {
         }
     }
 
+    public Double[][] getM(){
+        return M;
+    }
+
     public BigInteger[][] localTrainingDataEncryption(PublicParameters pp, SK_DO sk_do) {
         int d = M.length - 1;
         BigInteger[][] Mi = new BigInteger[M.length][M.length];

@@ -77,3 +77,6 @@
     * ``VANE`` 的 4.3.3 Local training data aggregation 的 step1 实现（既隐私保护加解密全部实现）
 * 3/21
     * 测试隐私保护加解密（bug 待修改）
+* 3/22
+    * 查阅线性回归相关资料
+    * 修 bug（paillier算法加解密异常，时常发生解密错误的情况，尚未发现原因）
