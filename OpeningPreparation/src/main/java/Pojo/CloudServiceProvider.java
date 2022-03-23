@@ -8,16 +8,25 @@ import java.math.BigInteger;
 import java.util.List;
 
 public class CloudServiceProvider {
-    public BigInteger[][] localTrainingDataAggregation(List<BigInteger[][]> list, PublicParameters pp, SK_CSP sk) {
-        int d = list.get(0).length;
+    /**
+     * 聚合并解密
+     * @param M
+     * @param pp
+     * @param sk_csp
+     * @param R
+     * @return
+     */
+    public BigInteger[][] localTrainingDataAggregation(List<BigInteger[][]> M, PublicParameters pp, SK_CSP sk_csp, List<BigInteger[][]> R) {
+        int d = M.get(0).length;
         BigInteger[][] fin = new BigInteger[d][d];
         for (int i = 0; i < d; i++) {
             for (int j = 0; j < d; j++) {
                 fin[i][j] = new BigInteger("1");
             }
         }
-        for (int n = 0; n < list.size() - 1; n++) {
-            BigInteger[][] multiply = list.get(n);
+        // 聚合
+        for (int n = 0; n < M.size(); n++) {
+            BigInteger[][] multiply = M.get(n);
             for (int i = 0; i < d; i++) {
                 for (int j = 0; j < d; j++) {
                     BigInteger cur = fin[i][j];
@@ -25,11 +34,17 @@ public class CloudServiceProvider {
                 }
             }
         }
+
+        // 解密
         for (int i = 0; i < d; i++) {
             for (int j = 0; j < d; j++) {
                 BigInteger cur = fin[i][j];
                 cur = SecureDataAggregationAlgorithmUtils.DataAggregation(cur, pp);
-                fin[i][j] = SecureDataAggregationAlgorithmUtils.AggregatedResultDecryption(cur, pp, sk);
+                BigInteger ri = new BigInteger("0");
+                for (int k = 0; k < R.size(); k++) {
+                    ri=ri.add(R.get(k)[i][j]);
+                }
+                fin[i][j] = SecureDataAggregationAlgorithmUtils.AggregatedResultDecryption(cur, pp, sk_csp, ri);
             }
         }
         return fin;

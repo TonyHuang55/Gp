@@ -18,6 +18,11 @@ public class TrustAuthority {
         return SecureDataAggregationAlgorithmUtils.keyGenerate(m);
     }
 
+    /**
+     * 计算各个维度的最值 & disturbs
+     * @param DOs
+     * @return
+     */
     public List[] globalDataNormalization(List<List[]> DOs) {
         List<List<Double>> max = new ArrayList<>();
         List<List<Double>> min = new ArrayList<>();
@@ -29,11 +34,12 @@ public class TrustAuthority {
         }
         List<Double> maxFeature = DataNormalizationUtils.maxCalculate(max);
         List<Double> minFeature = DataNormalizationUtils.minCalculate(min);
-//        for (int i = 0; i < maxFeature.size(); i++) {
-//            // 防止精度丢失
-//            maxFeature.set(i, BigDecimal.valueOf(maxFeature.get(i)).add(BigDecimal.valueOf(new Random().nextDouble()).setScale(2, BigDecimal.ROUND_HALF_UP)).doubleValue());
-//            minFeature.set(i, BigDecimal.valueOf(minFeature.get(i)).subtract(BigDecimal.valueOf(new Random().nextDouble()).setScale(2, BigDecimal.ROUND_HALF_UP)).doubleValue());
-//        }
+        // disturbs
+        for (int i = 0; i < maxFeature.size(); i++) {
+            // 防止精度丢失
+            maxFeature.set(i, BigDecimal.valueOf(maxFeature.get(i)).add(BigDecimal.valueOf(new Random().nextDouble()).setScale(2, BigDecimal.ROUND_HALF_UP)).doubleValue());
+            minFeature.set(i, BigDecimal.valueOf(minFeature.get(i)).subtract(BigDecimal.valueOf(new Random().nextDouble()).setScale(2, BigDecimal.ROUND_HALF_UP)).doubleValue());
+        }
 
         return new List[]{maxFeature, minFeature, Collections.singletonList(n)};
     }

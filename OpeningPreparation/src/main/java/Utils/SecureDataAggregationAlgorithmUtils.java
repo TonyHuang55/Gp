@@ -130,7 +130,14 @@ public class SecureDataAggregationAlgorithmUtils {
         return result;
     }
 
-    public static BigInteger DataEncryption(BigInteger x, PublicParameters pp, SK_DO sk_do) {
+    /**
+     * DataEncryption
+     * @param x     明文
+     * @param pp    pp
+     * @param sk_do sk_do
+     * @return
+     */
+    public static BigInteger[] DataEncryption(BigInteger x, PublicParameters pp, SK_DO sk_do) {
         BigInteger N = pp.getN(), g = pp.getG(), h = pp.getH();
         BigInteger Nsquare = N.multiply(N);
         // a random number which satisfies |r_i| < κ/2
@@ -139,18 +146,44 @@ public class SecureDataAggregationAlgorithmUtils {
             bl = new Random().nextInt(pp.getKapa() / 2 - 1) + 1;
         } while (bl == 1);
         BigInteger r = new BigInteger(bl, certainty, new Random());
-        return g.modPow(x, Nsquare).multiply(h.modPow(r, Nsquare)).multiply(sk_do.getSK_DOi()).mod(Nsquare);
+        // [[x(i)]] = g^x(i) · h^ri · SK_DOi mod N^2
+        BigInteger c = g.modPow(x, Nsquare).multiply(h.modPow(r, Nsquare)).multiply(sk_do.getSK_DOi()).mod(Nsquare);
+        /**
+         * 注：
+         * 解密时 mod N mod γ，因为|γ|＜κ/2 所以最后模γ后 x 是不可能超过它的，而原始明文空间的 x 是在 Z_N 中的。
+         * 如果 x 是一个介于γ和N之间的数，恢复出来的就不对
+         *
+         * 这里把 mod N mod γ 改为 => - γ∑ri mod N
+         * 故需要传参 ri
+         */
+        return new BigInteger[]{c, r};
     }
 
+    /**
+     * DataAggregation
+     * @param x     密文
+     * @param pp    pp
+     * @return
+     */
     public static BigInteger DataAggregation(BigInteger x, PublicParameters pp) {
         BigInteger N = pp.getN();
+        // [[x]] = [[x(i)]] mod N
         return x.mod(N.multiply(N));
     }
 
-    public static BigInteger AggregatedResultDecryption(BigInteger x, PublicParameters pp, SK_CSP sk_csp) {
+    /**
+     * AggregatedResultDecryption
+     * @param x         密文
+     * @param pp        pp
+     * @param sk_csp    sk_csp
+     * @param ri        随机数 ri
+     * @return
+     */
+    public static BigInteger AggregatedResultDecryption(BigInteger x, PublicParameters pp, SK_CSP sk_csp,BigInteger ri) {
         BigInteger N = pp.getN();
         BigInteger Nsquare = N.multiply(N);
         BigInteger lamda = sk_csp.getLamda(), miu = sk_csp.getMiu(), gama = sk_csp.getGama();
-        return BigIntegerUtils.functionL(x.modPow(lamda, Nsquare).multiply(miu), N).mod(N).mod(gama);
+        // x = (L([[x]]^γ mod N^2 ·μ)mod N) mod γ = (L([[x]]^γ mod N^2 ·μ)- γ∑ri)mod N)\
+        return (BigIntegerUtils.functionL(x.modPow(lamda, Nsquare).multiply(miu), N).subtract(ri.multiply(gama))).mod(N);
     }
 }

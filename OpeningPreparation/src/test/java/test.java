@@ -5,9 +5,6 @@ import Pojo.Keys.PublicParameters;
 import Pojo.Keys.SK_CSP;
 import Pojo.Keys.SK_DO;
 import Pojo.TrustAuthority;
-import Utils.LinearRegressionUtils;
-import Utils.PaillierCryptosystemUtils;
-import Utils.SecureDataAggregationAlgorithmUtils;
 import org.apache.commons.csv.*;
 import org.junit.Test;
 
@@ -20,8 +17,7 @@ import java.util.*;
 public class test {
     @Test
     public void test1() throws IOException {
-        System.out.println("4.3.1 System Initialization:");
-        System.out.println("Step1:System Parameters and Keys Distribution:");
+        System.out.println("系统初始化:");
         TrustAuthority ta = new TrustAuthority();
         // keyGenerate 后得到 PP、SK_DO 和 SK_CSP
         HashMap<String, Keys[]> keyGenerate = ta.keyGenerate(2);
@@ -35,7 +31,6 @@ public class test {
         Keys[] sk_csp = keyGenerate.get("SK_CSP");
         System.out.println("=============================================");
 
-        System.out.println("Step2:Data Normalization:");
         DataOwner do1 = new DataOwner();
         DataOwner do2 = new DataOwner();
         DataOwner[] dataOwners = {do1, do2};
@@ -52,19 +47,20 @@ public class test {
         DOs.add(list2);
 
         List[] globalMaxMin = ta.globalDataNormalization(DOs);
-        System.out.println(Arrays.toString(globalMaxMin));
+        System.out.println("各个维度最值（扰乱后）：" + Arrays.toString(globalMaxMin));
 
         dataOwners[0].localFeatureVectorNormalize(globalMaxMin[0], globalMaxMin[1]);
         dataOwners[1].localFeatureVectorNormalize(globalMaxMin[0], globalMaxMin[1]);
-
         dataOwners[0].dataPreprocessing();
         dataOwners[1].dataPreprocessing();
+
+        System.out.println("聚合明文结果：");
         Double[][] m1 = dataOwners[0].getM();
         Double[][] m2 = dataOwners[1].getM();
-        Double[][] m = new Double[m1.length][m1.length];
+        int[][] m = new int[m1.length][m1.length];
         for (int i = 0; i < m1.length; i++) {
             for (int j = 0; j < m1[0].length; j++) {
-                m[i][j] = Math.floor((m1[i][j] + m2[i][j]) * 1000);
+                m[i][j] = (int) Math.floor(m1[i][j] * 1000) + (int) Math.floor(m2[i][j] * 1000);
             }
         }
         for (int i = 0; i < m.length; i++) {
@@ -75,18 +71,25 @@ public class test {
         }
         System.out.println("=============================================");
 
-        BigInteger[][] res1 = dataOwners[0].localTrainingDataEncryption((PublicParameters) pp[0], (SK_DO) sk_dos[0]);
-        BigInteger[][] res2 = dataOwners[1].localTrainingDataEncryption((PublicParameters) pp[0], (SK_DO) sk_dos[1]);
+        List<BigInteger[][]> res1 = dataOwners[0].localTrainingDataEncryption((PublicParameters) pp[0], (SK_DO) sk_dos[0]);
+        List<BigInteger[][]> res2 = dataOwners[1].localTrainingDataEncryption((PublicParameters) pp[0], (SK_DO) sk_dos[1]);
 
-        List list = new ArrayList<BigInteger[][]>() {
+        List M = new ArrayList<BigInteger[][]>() {
             {
-                add(res1);
-                add(res2);
+                add(res1.get(0));
+                add(res2.get(0));
+            }
+        };
+        List R = new ArrayList<BigInteger[][]>() {
+            {
+                add(res1.get(1));
+                add(res2.get(1));
             }
         };
 
         CloudServiceProvider csp = new CloudServiceProvider();
-        BigInteger[][] res = csp.localTrainingDataAggregation(list, (PublicParameters) pp[0], (SK_CSP) sk_csp[0]);
+        BigInteger[][] res = csp.localTrainingDataAggregation(M, (PublicParameters) pp[0], (SK_CSP) sk_csp[0], R);
+        System.out.println("聚合解密结果：");
         for (int i = 0; i < res.length; i++) {
             for (int j = 0; j < res[0].length; j++) {
                 System.out.print(res[i][j] + " ");
@@ -96,6 +99,9 @@ public class test {
     }
 
     @Test
+    /**
+     * csv 读取测试
+     */
     public void csvTest() throws Exception {
 //        String[] headers = new String[]{
 //                "fixed acidity",
@@ -139,6 +145,9 @@ public class test {
     }
 
     @Test
+    /**
+     * 矩阵生成测试
+     */
     public void dataPreprocessingTest() {
         List<List<Double>> featureVector = new ArrayList<List<Double>>() {{
             add(Arrays.asList(new Double[]{1.0, 2.0, 3.0, 4.0, 5.0}));
@@ -183,61 +192,5 @@ public class test {
             }
             System.out.println();
         }
-    }
-
-    @Test
-    public void SecureDataAggregationAlgorithmUtils(){
-        TrustAuthority ta = new TrustAuthority();
-        // keyGenerate 后得到 PP、SK_DO 和 SK_CSP
-        HashMap<String, Keys[]> keyGenerate = ta.keyGenerate(2);
-
-        System.out.println("public parameters and secret keys for DOs and CSP");
-        for (String s : keyGenerate.keySet()) {
-            System.out.println(s + ":" + Arrays.toString(keyGenerate.get(s)));
-        }
-        Keys[] pp = keyGenerate.get("PP");
-        Keys[] sk_dos = keyGenerate.get("SK_DO");
-        Keys[] sk_csp = keyGenerate.get("SK_CSP");
-
-        BigInteger x1 = new BigInteger(64, 64, new Random());
-        BigInteger x2 = new BigInteger(64, 64, new Random());
-        BigInteger x3 = new BigInteger(64, 64, new Random());
-        BigInteger x4 = new BigInteger(64, 64, new Random());
-        BigInteger m1 = SecureDataAggregationAlgorithmUtils.DataEncryption(x1, (PublicParameters) pp[0], (SK_DO) sk_dos[0]);
-        BigInteger m2 = SecureDataAggregationAlgorithmUtils.DataEncryption(x2, (PublicParameters) pp[0], (SK_DO) sk_dos[0]);
-        BigInteger m3 = SecureDataAggregationAlgorithmUtils.DataEncryption(x3, (PublicParameters) pp[0], (SK_DO) sk_dos[1]);
-        BigInteger m4 = SecureDataAggregationAlgorithmUtils.DataEncryption(x4, (PublicParameters) pp[0], (SK_DO) sk_dos[1]);
-
-        BigInteger m = SecureDataAggregationAlgorithmUtils.DataAggregation(m1.multiply(m2).multiply(m3).multiply(m4), (PublicParameters) pp[0]);
-
-        BigInteger res = SecureDataAggregationAlgorithmUtils.AggregatedResultDecryption(m, (PublicParameters) pp[0], (SK_CSP) sk_csp[0]);
-        System.out.println(res);
-        BigInteger add = SecureDataAggregationAlgorithmUtils.DataAggregation(x1.add(x2).add(x3).add(x4), (PublicParameters) pp[0]);
-        System.out.println(add);
-        System.out.println(Objects.equals(res, add));
-    }
-
-    @Test
-    public void PaillierCryptosystemUtils(){
-        TrustAuthority ta = new TrustAuthority();
-        // keyGenerate 后得到 PP、SK_DO 和 SK_CSP
-        HashMap<String, Keys[]> keyGenerate = ta.keyGenerate(2);
-
-        System.out.println("public parameters and secret keys for DOs and CSP");
-        for (String s : keyGenerate.keySet()) {
-            System.out.println(s + ":" + Arrays.toString(keyGenerate.get(s)));
-        }
-        Keys[] pp = keyGenerate.get("PP");
-        Keys[] sk_dos = keyGenerate.get("SK_DO");
-        Keys[] sk_csp = keyGenerate.get("SK_CSP");
-
-        BigInteger x1 = new BigInteger(64, 64, new Random());
-        BigInteger x2 = new BigInteger(64, 64, new Random());
-        BigInteger m1 = PaillierCryptosystemUtils.Encryption(x1, (PublicParameters) pp[0]);
-        BigInteger m2 = PaillierCryptosystemUtils.Encryption(x2, (PublicParameters) pp[0]);
-
-        BigInteger m = m1.multiply(m2);
-        System.out.println(x1.add(x2));
-        System.out.println(PaillierCryptosystemUtils.Decryption(m, (PublicParameters) pp[0], (SK_CSP) sk_csp[0]));
     }
 }

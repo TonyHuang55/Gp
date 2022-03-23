@@ -60,6 +60,11 @@ public class DataOwner {
         totalData = parser.getRecords();
     }
 
+    /**
+     * 归一化
+     * @param max
+     * @param min
+     */
     public void localFeatureVectorNormalize(List<Double> max, List<Double> min) {
         for (int i = 0; i < featureVector.size(); i++) {
             List<Double> list = featureVector.get(i);
@@ -69,6 +74,9 @@ public class DataOwner {
         }
     }
 
+    /**
+     * 生成矩阵
+     */
     public void dataPreprocessing() {
         int d = featureVector.get(0).size();
         // 初始化
@@ -99,20 +107,32 @@ public class DataOwner {
         }
     }
 
-    public Double[][] getM(){
+    public Double[][] getM() {
         return M;
     }
 
-    public BigInteger[][] localTrainingDataEncryption(PublicParameters pp, SK_DO sk_do) {
+    /**
+     * 加密
+     * @param pp
+     * @param sk_do
+     * @return
+     */
+    public List<BigInteger[][]> localTrainingDataEncryption(PublicParameters pp, SK_DO sk_do) {
         int d = M.length - 1;
         BigInteger[][] Mi = new BigInteger[M.length][M.length];
+        BigInteger[][] Ri = new BigInteger[M.length][M.length];
         for (int i = 0; i <= d; i++) {
             for (int j = 0; j <= d; j++) {
                 String integer = String.valueOf(Math.floor(M[i][j] * 1000));
                 BigInteger m = new BigInteger(integer.substring(0, integer.length() - 2));
-                Mi[i][j] = SecureDataAggregationAlgorithmUtils.DataEncryption(m, pp, sk_do);
+                BigInteger[] res = SecureDataAggregationAlgorithmUtils.DataEncryption(m, pp, sk_do);
+                Mi[i][j] = res[0];
+                Ri[i][j] = res[1];
             }
         }
-        return Mi;
+        return new ArrayList<BigInteger[][]>() {{
+            add(Mi);
+            add(Ri);
+        }};
     }
 }
