@@ -5,6 +5,7 @@ import Pojo.Keys.PublicParameters;
 import Pojo.Keys.SK_CSP;
 import Pojo.Keys.SK_DO;
 import Pojo.TrustAuthority;
+import Utils.LinearRegressionUtils;
 import org.apache.commons.csv.*;
 import org.junit.Test;
 
@@ -96,6 +97,9 @@ public class test {
             }
             System.out.println();
         }
+        System.out.println("=============================================");
+
+        LinearRegressionUtils.LR(res);
     }
 
     @Test
