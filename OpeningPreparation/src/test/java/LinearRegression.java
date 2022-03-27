@@ -38,20 +38,20 @@ public class LinearRegression {
 
     public static void LR(Double[][] M) {
         BigDecimal learning_rate = new BigDecimal("0.0005");
-        BigDecimal a = new BigDecimal("0.89"),
-                a0 = new BigDecimal("0.01"),
-                a1 = new BigDecimal("0.89"),
-                a2 = new BigDecimal("0.89"),
-                a3 = new BigDecimal("0.48"),
-                a4 = new BigDecimal("0.89"),
-                a5 = new BigDecimal("0"),
-                a6 = new BigDecimal("0"),
-                a7 = new BigDecimal("0.89"),
-                a8 = new BigDecimal("0.57"),
-                a9 = new BigDecimal("0.89"),
-                a10 = new BigDecimal("0");
+        BigDecimal a = new BigDecimal("0.86791927273974597"),
+               a0 = new BigDecimal("-0.02863863926935459"),
+                a1 = new BigDecimal("0.78773951112872807"),
+                a2 = new BigDecimal("0.90811648099794773"),
+                a3 = new BigDecimal("0.02001668232407598"),
+                a4 = new BigDecimal("0.87275243364146317"),
+                a5 = new BigDecimal("0.00822295930092309"),
+               a6 = new BigDecimal("-0.00704432502990690"),
+                a7 = new BigDecimal("0.86746078015296808"),
+                a8 = new BigDecimal("0.47698629100001151"),
+                a9 = new BigDecimal("0.88631290340910164"),
+               a10 = new BigDecimal("0.13456280351882634");
 
-        int iterator = 200;
+        int iterator = 250;
         for (int i = 0; i < iterator; i++) {
             BigDecimal gradient_a = new BigDecimal("0"),
                     gradient_a0 = new BigDecimal("0"),
