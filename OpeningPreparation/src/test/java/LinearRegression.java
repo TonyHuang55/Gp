@@ -1,13 +1,13 @@
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
 import org.junit.Test;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 
@@ -25,33 +25,61 @@ public class LinearRegression {
         CSVFormat format = CSVFormat.EXCEL.withHeader(headers).withDelimiter(';');
         CSVParser parser = new CSVParser(fileReader, format);
         List<CSVRecord> totalData = parser.getRecords();
-        Double[][] orgData = new Double[totalData.size() - 1][12];
+        double[][] x = new double[totalData.size() - 1][11];
+        double[] y = new double[totalData.size() - 1];
         for (int count = 1; count < totalData.size(); count++) {
             CSVRecord record = totalData.get(count);
-            for (int d = 0; d < record.size(); d++) {
-                orgData[count - 1][d] = (Double.valueOf(record.get(d)));
+            for (int d = 0; d < record.size() - 1; d++) {
+                x[count - 1][d] = (Double.valueOf(record.get(d)));
             }
+            y[count - 1] = (Double.valueOf(record.get(record.size() - 1)));
         }
-        LR(orgData);
+
+
+        OLSMultipleLinearRegression regression = new OLSMultipleLinearRegression();
+
+        regression.newSampleData(y, x);
+
+        double[] doubles = regression.estimateRegressionParameters();
+        for (double aDouble : doubles) {
+            System.out.println(aDouble);
+        }
+
+        int c = 0;
+        for (int count = 0; count < x.length; count++) {
+            double[] x1 = x[count];
+            double y1 = y[count];
+            double cal = doubles[0];
+            for (int i = 0; i < x1.length; i++) {
+                cal += doubles[i + 1] * x1[i];
+            }
+            cal = Math.round(cal);
+            if(cal!=y1){
+                c++;
+            }
+            System.out.println("回归结果为：" + cal + ",实际结果为：" + y1);
+        }
+        System.out.println(c);
 
     }
 
     public static void LR(Double[][] M) {
         BigDecimal learning_rate = new BigDecimal("0.0005");
-        BigDecimal a = new BigDecimal("0.86791927273974597"),
-               a0 = new BigDecimal("-0.02863863926935459"),
-                a1 = new BigDecimal("0.78773951112872807"),
-                a2 = new BigDecimal("0.90811648099794773"),
-                a3 = new BigDecimal("0.02001668232407598"),
-                a4 = new BigDecimal("0.87275243364146317"),
-                a5 = new BigDecimal("0.00822295930092309"),
-               a6 = new BigDecimal("-0.00704432502990690"),
-                a7 = new BigDecimal("0.86746078015296808"),
-                a8 = new BigDecimal("0.47698629100001151"),
-                a9 = new BigDecimal("0.88631290340910164"),
-               a10 = new BigDecimal("0.13456280351882634");
+        BigDecimal a = new BigDecimal("1"),
+                a0 = new BigDecimal("1"),
+                a1 = new BigDecimal("1"),
+                a2 = new BigDecimal("1"),
+                a3 = new BigDecimal("1"),
+                a4 = new BigDecimal("1"),
+                a5 = new BigDecimal("1"),
+                a6 = new BigDecimal("1"),
+                a7 = new BigDecimal("1"),
+                a8 = new BigDecimal("1"),
+                a9 = new BigDecimal("1"),
+                a10 = new BigDecimal("1");
 
-        int iterator = 250;
+        int iterator = 200;
+        BigDecimal lastLoss = new BigDecimal(Double.MAX_VALUE);
         for (int i = 0; i < iterator; i++) {
             BigDecimal gradient_a = new BigDecimal("0"),
                     gradient_a0 = new BigDecimal("0"),
@@ -101,7 +129,15 @@ public class LinearRegression {
             }
             Arrays.sort(loss);
             BigDecimal loss1 = loss[0].multiply(loss[0]).divide(new BigDecimal("2"));
+            BigDecimal derta = lastLoss.subtract(loss1);
+            System.out.println(derta);
             System.out.println("第" + i + "轮：" + loss1);
+            if ((derta.abs()).compareTo(new BigDecimal("0.00001")) > 0 || loss1.compareTo(new BigDecimal(5)) > 0) {
+                lastLoss = loss1;
+            } else {
+                break;
+            }
+
             a = a.subtract(learning_rate.multiply(gradient_a));
             a0 = a0.subtract(learning_rate.multiply(gradient_a0));
             a1 = a1.subtract(learning_rate.multiply(gradient_a1));
@@ -126,4 +162,5 @@ public class LinearRegression {
     private static BigDecimal iteritor(BigDecimal gradient, BigDecimal size, BigDecimal loss, BigDecimal x) {
         return gradient.subtract(size.multiply(loss).multiply(x));
     }
+
 }
