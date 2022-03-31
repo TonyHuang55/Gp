@@ -15,7 +15,7 @@ public class SecureDataAggregationAlgorithmUtils {
      * 准确度
      */
     private final static int certainty = 64;
-    private final static int kapa = 512;
+    private final static int kapa = 1024;
 
     /**
      * keyGenerate
