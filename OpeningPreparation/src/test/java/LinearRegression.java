@@ -1,3 +1,4 @@
+import Utils.DataNormalizationUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -8,24 +9,25 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class LinearRegression {
     @Test
     public void test1() throws IOException {
-        String localURL = "src/main/resources/database/winequality-red.csv";
+        String localURL = "src/main/resources/database/house_data.csv";
         FileReader fileReader = new FileReader(localURL);
         String combineHeaders = new BufferedReader(new FileReader(localURL)).readLine();
-        String[] headers = combineHeaders.split(";");
-        for (int i = 0; i < headers.length; i++) {
-            String tmp = headers[i];
-            headers[i] = tmp.substring(1, tmp.length() - 1);
-        }
-        CSVFormat format = CSVFormat.EXCEL.withHeader(headers).withDelimiter(';');
+        String[] headers = combineHeaders.split(",");
+//        for (int i = 0; i < headers.length; i++) {
+//            String tmp = headers[i];
+//            headers[i] = tmp.substring(1, tmp.length() - 1);
+//        }
+        CSVFormat format = CSVFormat.EXCEL.withHeader(headers).withDelimiter(',');
         CSVParser parser = new CSVParser(fileReader, format);
         List<CSVRecord> totalData = parser.getRecords();
-        double[][] x = new double[totalData.size() - 1][11];
+        double[][] x = new double[totalData.size() - 1][13];
         double[] y = new double[totalData.size() - 1];
         for (int count = 1; count < totalData.size(); count++) {
             CSVRecord record = totalData.get(count);
@@ -57,9 +59,9 @@ public class LinearRegression {
             if (cal != y1) {
                 c++;
             }
-            System.out.println("回归结果为：" + cal + ",实际结果为：" + y1);
+//            System.out.println("回归结果为：" + cal + ",实际结果为：" + y1);
         }
-        double rate1 = (1599.0 - c) / 1599.0;
+        double rate1 = (506.0 - c) / 506.0;
         System.out.println("调包训练结果正确率：" + rate1);
 
 //        int c1 = 0;//971
@@ -119,25 +121,35 @@ public class LinearRegression {
 
     @Test
     public void test3() throws IOException {
-        String localURL = "src/main/resources/database/winequality-red.csv";
+        String localURL = "src/main/resources/database/house_data.csv";
         FileReader fileReader = new FileReader(localURL);
         String combineHeaders = new BufferedReader(new FileReader(localURL)).readLine();
-        String[] headers = combineHeaders.split(";");
-        for (int i = 0; i < headers.length; i++) {
-            String tmp = headers[i];
-            headers[i] = tmp.substring(1, tmp.length() - 1);
-        }
-        CSVFormat format = CSVFormat.EXCEL.withHeader(headers).withDelimiter(';');
+        String[] headers = combineHeaders.split(",");
+//        for (int i = 0; i < headers.length; i++) {
+//            String tmp = headers[i];
+//            headers[i] = tmp.substring(1, tmp.length() - 1);
+//        }
+        CSVFormat format = CSVFormat.EXCEL.withHeader(headers).withDelimiter(',');
         CSVParser parser = new CSVParser(fileReader, format);
         List<CSVRecord> totalData = parser.getRecords();
-        double[][] x = new double[totalData.size() - 1][11];
+        double[][] x = new double[totalData.size() - 1][13];
         double[] y = new double[totalData.size() - 1];
         for (int count = 1; count < totalData.size(); count++) {
             CSVRecord record = totalData.get(count);
             for (int d = 0; d < record.size() - 1; d++) {
                 x[count - 1][d] = (Double.parseDouble(record.get(d)));
             }
-            y[count - 1] = (Double.parseDouble(record.get(record.size() - 1)));
+            y[count - 1] = Double.parseDouble(record.get(record.size() - 1));
+        }
+
+        double[] max = maxCalculate(x);
+        double[] min = minCalculate(x);
+
+        for (int i = 0; i < x.length; i++) {
+            double[] list = x[i];
+            for (int j = 0; j < list.length; j++) {
+                list[j] = (list[j] - min[j]) / (max[j] - min[j]);
+            }
         }
 
         LR(x, y);
@@ -248,8 +260,13 @@ public class LinearRegression {
     }
 
     public static void LR(double[][] X, double[] Y) {
+        double averageY = 0.0;
+        for (double cury : Y) {
+            averageY += cury;
+        }
+        averageY = averageY / Y.length;
         // α ：学习率
-        BigDecimal learning_rate = new BigDecimal("0.0005");
+        BigDecimal learning_rate = new BigDecimal("0.3");
         // a为常数项，a0 ~ a10 是因子的系数项
         // 权重初始值全都为 1
         BigDecimal a = new BigDecimal("1"),
@@ -263,10 +280,12 @@ public class LinearRegression {
                 a7 = new BigDecimal("1"),
                 a8 = new BigDecimal("1"),
                 a9 = new BigDecimal("1"),
-                a10 = new BigDecimal("1");
+                a10 = new BigDecimal("1"),
+                a11 = new BigDecimal("1"),
+                a12 = new BigDecimal("1");
 
         // 迭代次数
-        int iterator = 2000;
+        int iterator = 500;
         // 用于记录上一轮迭代的损失函数
         BigDecimal lastLoss = new BigDecimal(Double.MAX_VALUE);
         // 用于记录损失函数的最小值，作为终止条件
@@ -283,7 +302,9 @@ public class LinearRegression {
                     gradient_a7 = new BigDecimal("0"),
                     gradient_a8 = new BigDecimal("0"),
                     gradient_a9 = new BigDecimal("0"),
-                    gradient_a10 = new BigDecimal("0");
+                    gradient_a10 = new BigDecimal("0"),
+                    gradient_a11 = new BigDecimal("0"),
+                    gradient_a12 = new BigDecimal("0");
 
             BigDecimal totalLoss = new BigDecimal("0");
             for (int k = 0; k < X.length; k++) {
@@ -298,11 +319,14 @@ public class LinearRegression {
                         x8 = BigDecimal.valueOf(X[k][8]),
                         x9 = BigDecimal.valueOf(X[k][9]),
                         x10 = BigDecimal.valueOf(X[k][10]),
+                        x11 = BigDecimal.valueOf(X[k][11]),
+                        x12 = BigDecimal.valueOf(X[k][12]),
                         y = BigDecimal.valueOf(Y[k]);
 
                 // y - h(x)
                 BigDecimal func = y.subtract(a.add(a0.multiply(x0)).add(a1.multiply(x1)).add(a2.multiply(x2)).add(a3.multiply(x3)).add(a4.multiply(x4)).
-                        add(a5.multiply(x5)).add(a6.multiply(x6)).add(a7.multiply(x7)).add(a8.multiply(x8)).add(a9.multiply(x9)).add(a10.multiply(x10)));
+                        add(a5.multiply(x5)).add(a6.multiply(x6)).add(a7.multiply(x7)).add(a8.multiply(x8)).add(a9.multiply(x9)).add(a10.multiply(x10)).
+                        add(a11.multiply(x11)).add(a12.multiply(x12)));
                 BigDecimal size = new BigDecimal(String.valueOf(1.0 / X.length));
                 // ∑(y - h(x))^2
                 totalLoss = totalLoss.add(func.multiply(func));
@@ -319,6 +343,8 @@ public class LinearRegression {
                 gradient_a8 = gradient_a8.subtract(size.multiply(func).multiply(x8));
                 gradient_a9 = gradient_a9.subtract(size.multiply(func).multiply(x9));
                 gradient_a10 = gradient_a10.subtract(size.multiply(func).multiply(x10));
+                gradient_a11 = gradient_a11.subtract(size.multiply(func).multiply(x11));
+                gradient_a12 = gradient_a12.subtract(size.multiply(func).multiply(x12));
 
             }
 
@@ -334,6 +360,8 @@ public class LinearRegression {
             a8 = a8.subtract(learning_rate.multiply(gradient_a8));
             a9 = a9.subtract(learning_rate.multiply(gradient_a9));
             a10 = a10.subtract(learning_rate.multiply(gradient_a10));
+            a11 = a11.subtract(learning_rate.multiply(gradient_a11));
+            a12 = a12.subtract(learning_rate.multiply(gradient_a12));
             // loss(θ) = 1/2n * ∑(y - h(x))^2
             BigDecimal lossFunc = totalLoss.divide(new BigDecimal(2 * X.length), 4);
             BigDecimal derta = lastLoss.subtract(lossFunc);
@@ -342,7 +370,7 @@ public class LinearRegression {
                 minLoss = lossFunc;
             }
             System.out.println("第" + (i + 1) + "轮：" + lossFunc);
-            if (derta.abs().compareTo(new BigDecimal("0.0001")) < 0) {
+            if (derta.abs().compareTo(new BigDecimal("0.005")) < 0) {
                 break;
             } else {
                 lastLoss = lossFunc;
@@ -368,9 +396,15 @@ public class LinearRegression {
                 a7.setScale(5, BigDecimal.ROUND_HALF_UP).doubleValue(),
                 a8.setScale(5, BigDecimal.ROUND_HALF_UP).doubleValue(),
                 a9.setScale(5, BigDecimal.ROUND_HALF_UP).doubleValue(),
-                a10.setScale(5, BigDecimal.ROUND_HALF_UP).doubleValue()
+                a10.setScale(5, BigDecimal.ROUND_HALF_UP).doubleValue(),
+                a11.setScale(5, BigDecimal.ROUND_HALF_UP).doubleValue(),
+                a12.setScale(5, BigDecimal.ROUND_HALF_UP).doubleValue()
         };
-        int c = 0;
+//        for (double re : res) {
+//            System.out.println(re);
+//        }
+
+        double SSE = 0.0, SST = 0.0;
         for (int count = 0; count < X.length; count++) {
             double[] curX = X[count];
             double curY = Y[count];
@@ -378,18 +412,42 @@ public class LinearRegression {
             for (int i = 0; i < curX.length; i++) {
                 cal += res[i + 1] * curX[i];
             }
-            cal = Math.round(cal);
-            if ((int) cal != (int) curY) {
-                c++;
-            }
-//            System.out.println("回归结果为：" + cal + ",实际结果为：" + curY);
+            SSE += Math.pow((curY - cal), 2);
+            SST += Math.pow((curY - averageY), 2);
         }
-        double rate = (1599.0 - c) / 1599.0;
-        System.out.println("正确率：" + rate);
+        double R2 = 1.0 - SSE / SST;
+        System.out.println("R^2 =" + R2);
+
     }
 
     private static BigDecimal iteritor(BigDecimal gradient, BigDecimal size, BigDecimal loss, BigDecimal x) {
         return gradient.subtract(size.multiply(loss).multiply(x));
+    }
+
+    private static double[] maxCalculate(double[][] x) {
+        double[] maxFeature = new double[x[0].length];
+        for (int count = 0; count < x.length; count++) {
+            double[] curX = x[count];
+            for (int d = 0; d < curX.length; d++) {
+                double current = curX[d];
+                // 比较更新 max
+                if (maxFeature[d] <= current) maxFeature[d] = current;
+            }
+        }
+        return maxFeature;
+    }
+
+    private static double[] minCalculate(double[][] x) {
+        double[] minFeature = new double[x[0].length];
+        for (int count = 0; count < x.length; count++) {
+            double[] curX = x[count];
+            for (int d = 0; d < curX.length; d++) {
+                double current = curX[d];
+                // 比较更新 max
+                if (minFeature[d] >= current) minFeature[d] = current;
+            }
+        }
+        return minFeature;
     }
 
 }
