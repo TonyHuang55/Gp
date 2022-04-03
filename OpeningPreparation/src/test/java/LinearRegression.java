@@ -1,4 +1,3 @@
-import Utils.DataNormalizationUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -285,7 +284,7 @@ public class LinearRegression {
                 a12 = new BigDecimal("1");
 
         // 迭代次数
-        int iterator = 500;
+        int iterator = 1000;
         // 用于记录上一轮迭代的损失函数
         BigDecimal lastLoss = new BigDecimal(Double.MAX_VALUE);
         // 用于记录损失函数的最小值，作为终止条件
@@ -370,7 +369,7 @@ public class LinearRegression {
                 minLoss = lossFunc;
             }
             System.out.println("第" + (i + 1) + "轮：" + lossFunc);
-            if (derta.abs().compareTo(new BigDecimal("0.005")) < 0) {
+            if (derta.abs().compareTo(new BigDecimal("0.0005")) < 0) {
                 break;
             } else {
                 lastLoss = lossFunc;
@@ -416,7 +415,7 @@ public class LinearRegression {
             SST += Math.pow((curY - averageY), 2);
         }
         double R2 = 1.0 - SSE / SST;
-        System.out.println("R^2 =" + R2);
+        System.out.println("R^2 =" + R2);//R^2 =0.7282359232308551
 
     }
 

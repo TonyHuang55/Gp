@@ -48,13 +48,9 @@ public class DataOwner {
         FileReader fileReader = new FileReader(localURL);
         // 2.读取 csv 文件第一行标题
         String combineHeaders = new BufferedReader(new FileReader(localURL)).readLine();
-        String[] headers = combineHeaders.split(";");
-        for (int i = 0; i < headers.length; i++) {
-            String tmp = headers[i];
-            headers[i] = tmp.substring(1, tmp.length() - 1);
-        }
-        // 3.CSVFormat 解析，采用 EXCEL 枚举，标题为读取到的第一行分割标题，分割符为 `;`
-        CSVFormat format = CSVFormat.EXCEL.withHeader(headers).withDelimiter(';');
+        String[] headers = combineHeaders.split(",");
+        // 3.CSVFormat 解析，采用 EXCEL 枚举，标题为读取到的第一行分割标题，分割符为 `,`
+        CSVFormat format = CSVFormat.EXCEL.withHeader(headers).withDelimiter(',');
         // 4.读取数据
         CSVParser parser = new CSVParser(fileReader, format);
         totalData = parser.getRecords();
@@ -62,6 +58,7 @@ public class DataOwner {
 
     /**
      * 归一化
+     *
      * @param max
      * @param min
      */
@@ -113,6 +110,7 @@ public class DataOwner {
 
     /**
      * 加密
+     *
      * @param pp
      * @param sk_do
      * @return
@@ -124,7 +122,7 @@ public class DataOwner {
         for (int i = 0; i <= d; i++) {
             for (int j = 0; j <= d; j++) {
                 String integer = String.valueOf(Math.floor(M[i][j] * 1000));
-                BigInteger m = new BigInteger(integer.substring(0, integer.length() - 2));
+                BigInteger m = new BigInteger(integer.substring(0, integer.indexOf('.')));
                 BigInteger[] res = SecureDataAggregationAlgorithmUtils.DataEncryption(m, pp, sk_do);
                 Mi[i][j] = res[0];
                 Ri[i][j] = res[1];

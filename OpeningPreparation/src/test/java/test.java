@@ -42,8 +42,8 @@ public class test {
 //            DOs.add(lists);
 //            System.out.println("DO" + i + ":" + Arrays.toString(lists));
 //        }
-        List[] list1 = dataOwners[0].dataNormalization("src/main/resources/database/winequality-red1.csv");
-        List[] list2 = dataOwners[1].dataNormalization("src/main/resources/database/winequality-red2.csv");
+        List[] list1 = dataOwners[0].dataNormalization("src/main/resources/database/house_data.csv");
+        List[] list2 = dataOwners[1].dataNormalization("src/main/resources/database/house_data.csv");
         DOs.add(list1);
         DOs.add(list2);
 
@@ -99,7 +99,7 @@ public class test {
         }
         System.out.println("=============================================");
 
-        LinearRegressionUtils.LR(res);
+//        LinearRegressionUtils.LR(res);
     }
 
     @Test
