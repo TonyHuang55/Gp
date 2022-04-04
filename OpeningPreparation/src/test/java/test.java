@@ -12,6 +12,7 @@ import org.junit.Test;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -42,8 +43,8 @@ public class test {
 //            DOs.add(lists);
 //            System.out.println("DO" + i + ":" + Arrays.toString(lists));
 //        }
-        List[] list1 = dataOwners[0].dataNormalization("src/main/resources/database/house_data.csv");
-        List[] list2 = dataOwners[1].dataNormalization("src/main/resources/database/house_data.csv");
+        List[] list1 = dataOwners[0].dataNormalization("src/main/resources/database/house_data1.csv");
+        List[] list2 = dataOwners[1].dataNormalization("src/main/resources/database/house_data2.csv");
         DOs.add(list1);
         DOs.add(list2);
 
@@ -98,8 +99,38 @@ public class test {
             System.out.println();
         }
         System.out.println("=============================================");
+        int n = (int) globalMaxMin[2].get(0);
+        LinearRegressionUtils.LR(res, n);
+    }
 
-//        LinearRegressionUtils.LR(res);
+    @Test
+    public void test3() throws IOException {
+        String localURL = "src/main/resources/database/house_dataTest.csv";
+        FileReader fileReader = new FileReader(localURL);
+        String combineHeaders = new BufferedReader(new FileReader(localURL)).readLine();
+        String[] headers = combineHeaders.split(",");
+        CSVFormat format = CSVFormat.EXCEL.withHeader(headers).withDelimiter(',');
+        CSVParser parser = new CSVParser(fileReader, format);
+        List<CSVRecord> totalData = parser.getRecords();
+        BigInteger[][] res = new BigInteger[totalData.size() - 1][totalData.size() - 1];
+        for (int count = 1; count < totalData.size(); count++) {
+            CSVRecord record = totalData.get(count);
+            for (int d = 0; d < record.size(); d++) {
+                res[count - 1][d] = new BigInteger(record.get(d));
+            }
+        }
+        int n = 506;
+
+        BigDecimal[] a = LinearRegressionUtils.LR(res, n);
+
+//        String localURL1 = "src/main/resources/database/house_data.csv";
+//        FileReader fileReader1 = new FileReader(localURL1);
+//        String combineHeaders1 = new BufferedReader(new FileReader(localURL1)).readLine();
+//        String[] headers1 = combineHeaders1.split(",");
+//        CSVFormat format1 = CSVFormat.EXCEL.withHeader(headers1).withDelimiter(',');
+//        CSVParser parser1 = new CSVParser(fileReader1, format1);
+//        List<CSVRecord> totalData1 = parser1.getRecords();
+//        LinearRegressionUtils.check(totalData1,a);
     }
 
     @Test
