@@ -10,7 +10,7 @@ import java.util.List;
 public class LinearRegressionUtils {
     public static BigDecimal[] LR(BigInteger[][] M, int n) {
         // α ：学习率
-        BigDecimal learning_rate = new BigDecimal("0.0000001");
+        BigDecimal learning_rate = new BigDecimal("0.000001");
         // a为常数项，a0 ~ a12 是因子的系数项
         // 权重初始值全都为 1
         BigDecimal[] a = new BigDecimal[M.length];
