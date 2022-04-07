@@ -104,6 +104,92 @@ public class test {
     }
 
     @Test
+    public void test2() throws IOException {
+        System.out.println("系统初始化:");
+        TrustAuthority ta = new TrustAuthority();
+        // keyGenerate 后得到 PP、SK_DO 和 SK_CSP
+        HashMap<String, Keys[]> keyGenerate = ta.keyGenerate(2);
+
+        System.out.println("public parameters and secret keys for DOs and CSP");
+        for (String s : keyGenerate.keySet()) {
+            System.out.println(s + ":" + Arrays.toString(keyGenerate.get(s)));
+        }
+        Keys[] pp = keyGenerate.get("PP");
+        Keys[] sk_dos = keyGenerate.get("SK_DO");
+        Keys[] sk_csp = keyGenerate.get("SK_CSP");
+        System.out.println("=============================================");
+
+        DataOwner do1 = new DataOwner();
+        DataOwner do2 = new DataOwner();
+        DataOwner[] dataOwners = {do1, do2};
+
+        List<List[]> DOs = new ArrayList<>();
+//        for (int i = 0; i < dataOwners.length; i++) {
+//            List[] lists = dataOwners[i].dataNormalization("src/main/resources/database/winequality-red.csv");
+//            DOs.add(lists);
+//            System.out.println("DO" + i + ":" + Arrays.toString(lists));
+//        }
+        List[] list1 = dataOwners[0].dataNormalization("src/main/resources/database/winequality-red1.csv");
+        List[] list2 = dataOwners[1].dataNormalization("src/main/resources/database/winequality-red2.csv");
+        DOs.add(list1);
+        DOs.add(list2);
+
+        List[] globalMaxMin = ta.globalDataNormalization(DOs);
+        System.out.println("各个维度最值（扰乱后）：" + Arrays.toString(globalMaxMin));
+
+        dataOwners[0].localFeatureVectorNormalize(globalMaxMin[0], globalMaxMin[1]);
+        dataOwners[1].localFeatureVectorNormalize(globalMaxMin[0], globalMaxMin[1]);
+        dataOwners[0].dataPreprocessing();
+        dataOwners[1].dataPreprocessing();
+
+        System.out.println("聚合明文结果：");
+        Double[][] m1 = dataOwners[0].getM();
+        Double[][] m2 = dataOwners[1].getM();
+        int[][] m = new int[m1.length][m1.length];
+        for (int i = 0; i < m1.length; i++) {
+            for (int j = 0; j < m1[0].length; j++) {
+                m[i][j] = (int) Math.floor(m1[i][j] * 1000) + (int) Math.floor(m2[i][j] * 1000);
+            }
+        }
+        for (int i = 0; i < m.length; i++) {
+            for (int j = 0; j < m.length; j++) {
+                System.out.print(m[i][j] + " ");
+            }
+            System.out.println();
+        }
+        System.out.println("=============================================");
+
+        List<BigInteger[][]> res1 = dataOwners[0].localTrainingDataEncryption((PublicParameters) pp[0], (SK_DO) sk_dos[0]);
+        List<BigInteger[][]> res2 = dataOwners[1].localTrainingDataEncryption((PublicParameters) pp[0], (SK_DO) sk_dos[1]);
+
+        List M = new ArrayList<BigInteger[][]>() {
+            {
+                add(res1.get(0));
+                add(res2.get(0));
+            }
+        };
+        List R = new ArrayList<BigInteger[][]>() {
+            {
+                add(res1.get(1));
+                add(res2.get(1));
+            }
+        };
+
+        CloudServiceProvider csp = new CloudServiceProvider();
+        BigInteger[][] res = csp.localTrainingDataAggregation(M, (PublicParameters) pp[0], (SK_CSP) sk_csp[0], R);
+        System.out.println("聚合解密结果：");
+        for (int i = 0; i < res.length; i++) {
+            for (int j = 0; j < res[0].length; j++) {
+                System.out.print(res[i][j] + " ");
+            }
+            System.out.println();
+        }
+        System.out.println("=============================================");
+        int n = (int) globalMaxMin[2].get(0);
+        LinearRegressionUtils.LR(res, n);
+    }
+
+    @Test
     public void test3() throws IOException {
         String localURL = "src/main/resources/database/house_dataTest.csv";
         FileReader fileReader = new FileReader(localURL);

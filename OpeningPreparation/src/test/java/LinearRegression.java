@@ -108,14 +108,35 @@ public class LinearRegression {
         CSVFormat format = CSVFormat.EXCEL.withHeader(headers).withDelimiter(';');
         CSVParser parser = new CSVParser(fileReader, format);
         List<CSVRecord> totalData = parser.getRecords();
-        Double[][] x = new Double[totalData.size() - 1][12];
+//        Double[][] x = new Double[totalData.size() - 1][12];
+//        for (int count = 1; count < totalData.size(); count++) {
+//            CSVRecord record = totalData.get(count);
+//            for (int d = 0; d < record.size(); d++) {
+//                x[count - 1][d] = (Double.valueOf(record.get(d)));
+//            }
+//        }
+//        LR(x);
+        double[][] x = new double[totalData.size() - 1][11];
+        double[] y = new double[totalData.size() - 1];
         for (int count = 1; count < totalData.size(); count++) {
             CSVRecord record = totalData.get(count);
-            for (int d = 0; d < record.size(); d++) {
-                x[count - 1][d] = (Double.valueOf(record.get(d)));
+            for (int d = 0; d < record.size() - 1; d++) {
+                x[count - 1][d] = (Double.parseDouble(record.get(d)));
+            }
+            y[count - 1] = Double.parseDouble(record.get(record.size() - 1));
+        }
+
+        double[] max = maxCalculate(x);
+        double[] min = minCalculate(x);
+
+        for (int i = 0; i < x.length; i++) {
+            double[] list = x[i];
+            for (int j = 0; j < list.length; j++) {
+                list[j] = (list[j] - min[j]) / (max[j] - min[j]);
             }
         }
-        LR(x);
+
+        LR(x, y);
     }
 
     @Test
@@ -265,102 +286,118 @@ public class LinearRegression {
         }
         averageY = averageY / Y.length;
         // α ：学习率
-        BigDecimal learning_rate = new BigDecimal("0.3");
+        BigDecimal learning_rate = new BigDecimal("0.1");
         // a为常数项，a0 ~ a10 是因子的系数项
         // 权重初始值全都为 1
-        BigDecimal a = new BigDecimal("1"),
-                a0 = new BigDecimal("1"),
-                a1 = new BigDecimal("1"),
-                a2 = new BigDecimal("1"),
-                a3 = new BigDecimal("1"),
-                a4 = new BigDecimal("1"),
-                a5 = new BigDecimal("1"),
-                a6 = new BigDecimal("1"),
-                a7 = new BigDecimal("1"),
-                a8 = new BigDecimal("1"),
-                a9 = new BigDecimal("1"),
-                a10 = new BigDecimal("1"),
-                a11 = new BigDecimal("1"),
-                a12 = new BigDecimal("1");
+        BigDecimal[] a = new BigDecimal[X[0].length + 1];
+        Arrays.fill(a, new BigDecimal("1"));
+//        BigDecimal a = new BigDecimal("1"),
+//                a0 = new BigDecimal("1"),
+//                a1 = new BigDecimal("1"),
+//                a2 = new BigDecimal("1"),
+//                a3 = new BigDecimal("1"),
+//                a4 = new BigDecimal("1"),
+//                a5 = new BigDecimal("1"),
+//                a6 = new BigDecimal("1"),
+//                a7 = new BigDecimal("1"),
+//                a8 = new BigDecimal("1"),
+//                a9 = new BigDecimal("1"),
+//                a10 = new BigDecimal("1"),
+//                a11 = new BigDecimal("1"),
+//                a12 = new BigDecimal("1");
 
         // 迭代次数
-        int iterator = 500;
+        int iterator = 1000;
         // 用于记录上一轮迭代的损失函数
         BigDecimal lastLoss = new BigDecimal(Double.MAX_VALUE);
         // 用于记录损失函数的最小值，作为终止条件
         BigDecimal minLoss = new BigDecimal(Double.MAX_VALUE);
         for (int i = 0; i < iterator; i++) {
-            BigDecimal gradient_a = new BigDecimal("0"),
-                    gradient_a0 = new BigDecimal("0"),
-                    gradient_a1 = new BigDecimal("0"),
-                    gradient_a2 = new BigDecimal("0"),
-                    gradient_a3 = new BigDecimal("0"),
-                    gradient_a4 = new BigDecimal("0"),
-                    gradient_a5 = new BigDecimal("0"),
-                    gradient_a6 = new BigDecimal("0"),
-                    gradient_a7 = new BigDecimal("0"),
-                    gradient_a8 = new BigDecimal("0"),
-                    gradient_a9 = new BigDecimal("0"),
-                    gradient_a10 = new BigDecimal("0"),
-                    gradient_a11 = new BigDecimal("0"),
-                    gradient_a12 = new BigDecimal("0");
-
+            BigDecimal[] gradient_a = new BigDecimal[X[0].length + 1];
+            Arrays.fill(gradient_a, new BigDecimal("0"));
+//            BigDecimal gradient_a = new BigDecimal("0"),
+//                    gradient_a0 = new BigDecimal("0"),
+//                    gradient_a1 = new BigDecimal("0"),
+//                    gradient_a2 = new BigDecimal("0"),
+//                    gradient_a3 = new BigDecimal("0"),
+//                    gradient_a4 = new BigDecimal("0"),
+//                    gradient_a5 = new BigDecimal("0"),
+//                    gradient_a6 = new BigDecimal("0"),
+//                    gradient_a7 = new BigDecimal("0"),
+//                    gradient_a8 = new BigDecimal("0"),
+//                    gradient_a9 = new BigDecimal("0"),
+//                    gradient_a10 = new BigDecimal("0"),
+//                    gradient_a11 = new BigDecimal("0"),
+//                    gradient_a12 = new BigDecimal("0");
             BigDecimal totalLoss = new BigDecimal("0");
             for (int k = 0; k < X.length; k++) {
-                BigDecimal x0 = BigDecimal.valueOf(X[k][0]),
-                        x1 = BigDecimal.valueOf(X[k][1]),
-                        x2 = BigDecimal.valueOf(X[k][2]),
-                        x3 = BigDecimal.valueOf(X[k][3]),
-                        x4 = BigDecimal.valueOf(X[k][4]),
-                        x5 = BigDecimal.valueOf(X[k][5]),
-                        x6 = BigDecimal.valueOf(X[k][6]),
-                        x7 = BigDecimal.valueOf(X[k][7]),
-                        x8 = BigDecimal.valueOf(X[k][8]),
-                        x9 = BigDecimal.valueOf(X[k][9]),
-                        x10 = BigDecimal.valueOf(X[k][10]),
-                        x11 = BigDecimal.valueOf(X[k][11]),
-                        x12 = BigDecimal.valueOf(X[k][12]),
-                        y = BigDecimal.valueOf(Y[k]);
+//                BigDecimal x0 = BigDecimal.valueOf(X[k][0]),
+//                        x1 = BigDecimal.valueOf(X[k][1]),
+//                        x2 = BigDecimal.valueOf(X[k][2]),
+//                        x3 = BigDecimal.valueOf(X[k][3]),
+//                        x4 = BigDecimal.valueOf(X[k][4]),
+//                        x5 = BigDecimal.valueOf(X[k][5]),
+//                        x6 = BigDecimal.valueOf(X[k][6]),
+//                        x7 = BigDecimal.valueOf(X[k][7]),
+//                        x8 = BigDecimal.valueOf(X[k][8]),
+//                        x9 = BigDecimal.valueOf(X[k][9]),
+//                        x10 = BigDecimal.valueOf(X[k][10]),
+//                        x11 = BigDecimal.valueOf(X[k][11]),
+//                        x12 = BigDecimal.valueOf(X[k][12]),
+//                        y = BigDecimal.valueOf(Y[k]);
 
                 // y - h(x)
-                BigDecimal func = y.subtract(a.add(a0.multiply(x0)).add(a1.multiply(x1)).add(a2.multiply(x2)).add(a3.multiply(x3)).add(a4.multiply(x4)).
-                        add(a5.multiply(x5)).add(a6.multiply(x6)).add(a7.multiply(x7)).add(a8.multiply(x8)).add(a9.multiply(x9)).add(a10.multiply(x10)).
-                        add(a11.multiply(x11)).add(a12.multiply(x12)));
+//                BigDecimal func = y.subtract(a.add(a0.multiply(x0)).add(a1.multiply(x1)).add(a2.multiply(x2)).add(a3.multiply(x3)).add(a4.multiply(x4)).
+//                        add(a5.multiply(x5)).add(a6.multiply(x6)).add(a7.multiply(x7)).add(a8.multiply(x8)).add(a9.multiply(x9)).add(a10.multiply(x10)).
+//                        add(a11.multiply(x11)).add(a12.multiply(x12)));
+                BigDecimal func = BigDecimal.valueOf(Y[k]);
+                func = func.subtract(a[0]);
+                for (int j = 1; j < X[0].length; j++) {
+                    func = func.subtract(BigDecimal.valueOf(X[k][j - 1]).multiply(a[j]));
+                }
+
                 BigDecimal size = new BigDecimal(String.valueOf(1.0 / X.length));
                 // ∑(y - h(x))^2
                 totalLoss = totalLoss.add(func.multiply(func));
                 // ∑(y - h(x))
-                gradient_a = gradient_a.subtract(size.multiply(func).multiply(BigDecimal.ONE));
-                gradient_a0 = gradient_a0.subtract(size.multiply(func).multiply(x0));
-                gradient_a1 = gradient_a1.subtract(size.multiply(func).multiply(x1));
-                gradient_a2 = gradient_a2.subtract(size.multiply(func).multiply(x2));
-                gradient_a3 = gradient_a3.subtract(size.multiply(func).multiply(x3));
-                gradient_a4 = gradient_a4.subtract(size.multiply(func).multiply(x4));
-                gradient_a5 = gradient_a5.subtract(size.multiply(func).multiply(x5));
-                gradient_a6 = gradient_a6.subtract(size.multiply(func).multiply(x6));
-                gradient_a7 = gradient_a7.subtract(size.multiply(func).multiply(x7));
-                gradient_a8 = gradient_a8.subtract(size.multiply(func).multiply(x8));
-                gradient_a9 = gradient_a9.subtract(size.multiply(func).multiply(x9));
-                gradient_a10 = gradient_a10.subtract(size.multiply(func).multiply(x10));
-                gradient_a11 = gradient_a11.subtract(size.multiply(func).multiply(x11));
-                gradient_a12 = gradient_a12.subtract(size.multiply(func).multiply(x12));
+
+                gradient_a[0] = gradient_a[0].subtract(size.multiply(func).multiply(BigDecimal.ONE));
+                for (int j = 1; j < gradient_a.length; j++) {
+                    gradient_a[j] = gradient_a[j].subtract(size.multiply(func).multiply(BigDecimal.valueOf(X[k][j - 1])));
+                }
+//                gradient_a0 = gradient_a0.subtract(size.multiply(func).multiply(x0));
+//                gradient_a1 = gradient_a1.subtract(size.multiply(func).multiply(x1));
+//                gradient_a2 = gradient_a2.subtract(size.multiply(func).multiply(x2));
+//                gradient_a3 = gradient_a3.subtract(size.multiply(func).multiply(x3));
+//                gradient_a4 = gradient_a4.subtract(size.multiply(func).multiply(x4));
+//                gradient_a5 = gradient_a5.subtract(size.multiply(func).multiply(x5));
+//                gradient_a6 = gradient_a6.subtract(size.multiply(func).multiply(x6));
+//                gradient_a7 = gradient_a7.subtract(size.multiply(func).multiply(x7));
+//                gradient_a8 = gradient_a8.subtract(size.multiply(func).multiply(x8));
+//                gradient_a9 = gradient_a9.subtract(size.multiply(func).multiply(x9));
+//                gradient_a10 = gradient_a10.subtract(size.multiply(func).multiply(x10));
+//                gradient_a11 = gradient_a11.subtract(size.multiply(func).multiply(x11));
+//                gradient_a12 = gradient_a12.subtract(size.multiply(func).multiply(x12));
 
             }
 
-            a = a.subtract(learning_rate.multiply(gradient_a));
-            a0 = a0.subtract(learning_rate.multiply(gradient_a0));
-            a1 = a1.subtract(learning_rate.multiply(gradient_a1));
-            a2 = a2.subtract(learning_rate.multiply(gradient_a2));
-            a3 = a3.subtract(learning_rate.multiply(gradient_a3));
-            a4 = a4.subtract(learning_rate.multiply(gradient_a4));
-            a5 = a5.subtract(learning_rate.multiply(gradient_a5));
-            a6 = a6.subtract(learning_rate.multiply(gradient_a6));
-            a7 = a7.subtract(learning_rate.multiply(gradient_a7));
-            a8 = a8.subtract(learning_rate.multiply(gradient_a8));
-            a9 = a9.subtract(learning_rate.multiply(gradient_a9));
-            a10 = a10.subtract(learning_rate.multiply(gradient_a10));
-            a11 = a11.subtract(learning_rate.multiply(gradient_a11));
-            a12 = a12.subtract(learning_rate.multiply(gradient_a12));
+            for (int j = 0; j < a.length; j++) {
+                a[j] = a[j].subtract(learning_rate.multiply(gradient_a[j]));
+            }
+//            a = a.subtract(learning_rate.multiply(gradient_a));
+//            a0 = a0.subtract(learning_rate.multiply(gradient_a0));
+//            a1 = a1.subtract(learning_rate.multiply(gradient_a1));
+//            a2 = a2.subtract(learning_rate.multiply(gradient_a2));
+//            a3 = a3.subtract(learning_rate.multiply(gradient_a3));
+//            a4 = a4.subtract(learning_rate.multiply(gradient_a4));
+//            a5 = a5.subtract(learning_rate.multiply(gradient_a5));
+//            a6 = a6.subtract(learning_rate.multiply(gradient_a6));
+//            a7 = a7.subtract(learning_rate.multiply(gradient_a7));
+//            a8 = a8.subtract(learning_rate.multiply(gradient_a8));
+//            a9 = a9.subtract(learning_rate.multiply(gradient_a9));
+//            a10 = a10.subtract(learning_rate.multiply(gradient_a10));
+//            a11 = a11.subtract(learning_rate.multiply(gradient_a11));
+//            a12 = a12.subtract(learning_rate.multiply(gradient_a12));
             // loss(θ) = 1/2n * ∑(y - h(x))^2
             BigDecimal lossFunc = totalLoss.divide(new BigDecimal(2 * X.length), 4);
             BigDecimal derta = lastLoss.subtract(lossFunc);
@@ -383,23 +420,7 @@ public class LinearRegression {
 
         System.out.println("====================================================");
 
-        double[] res = {
-                a.setScale(5, BigDecimal.ROUND_HALF_UP).doubleValue(),
-                a0.setScale(5, BigDecimal.ROUND_HALF_UP).doubleValue(),
-                a1.setScale(5, BigDecimal.ROUND_HALF_UP).doubleValue(),
-                a2.setScale(5, BigDecimal.ROUND_HALF_UP).doubleValue(),
-                a3.setScale(5, BigDecimal.ROUND_HALF_UP).doubleValue(),
-                a4.setScale(5, BigDecimal.ROUND_HALF_UP).doubleValue(),
-                a5.setScale(5, BigDecimal.ROUND_HALF_UP).doubleValue(),
-                a6.setScale(5, BigDecimal.ROUND_HALF_UP).doubleValue(),
-                a7.setScale(5, BigDecimal.ROUND_HALF_UP).doubleValue(),
-                a8.setScale(5, BigDecimal.ROUND_HALF_UP).doubleValue(),
-                a9.setScale(5, BigDecimal.ROUND_HALF_UP).doubleValue(),
-                a10.setScale(5, BigDecimal.ROUND_HALF_UP).doubleValue(),
-                a11.setScale(5, BigDecimal.ROUND_HALF_UP).doubleValue(),
-                a12.setScale(5, BigDecimal.ROUND_HALF_UP).doubleValue()
-        };
-        for (double re : res) {
+        for (BigDecimal re : a) {
             System.out.println(re);
         }
 
@@ -407,9 +428,9 @@ public class LinearRegression {
         for (int count = 0; count < X.length; count++) {
             double[] curX = X[count];
             double curY = Y[count];
-            double cal = res[0];
+            double cal = a[0].doubleValue();
             for (int i = 0; i < curX.length; i++) {
-                cal += res[i + 1] * curX[i];
+                cal += a[i + 1].doubleValue() * curX[i];
             }
             SSE += Math.pow((curY - cal), 2);
             SST += Math.pow((curY - averageY), 2);
@@ -425,7 +446,8 @@ public class LinearRegression {
 
     private static double[] maxCalculate(double[][] x) {
         double[] maxFeature = new double[x[0].length];
-        for (int count = 0; count < x.length; count++) {
+        System.arraycopy(x[0], 0, maxFeature, 0, maxFeature.length);
+        for (int count = 1; count < x.length; count++) {
             double[] curX = x[count];
             for (int d = 0; d < curX.length; d++) {
                 double current = curX[d];
@@ -438,7 +460,8 @@ public class LinearRegression {
 
     private static double[] minCalculate(double[][] x) {
         double[] minFeature = new double[x[0].length];
-        for (int count = 0; count < x.length; count++) {
+        System.arraycopy(x[0], 0, minFeature, 0, minFeature.length);
+        for (int count = 1; count < x.length; count++) {
             double[] curX = x[count];
             for (int d = 0; d < curX.length; d++) {
                 double current = curX[d];
