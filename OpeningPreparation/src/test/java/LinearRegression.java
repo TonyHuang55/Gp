@@ -307,7 +307,7 @@ public class LinearRegression {
 //                a12 = new BigDecimal("1");
 
         // 迭代次数
-        int iterator = 1000;
+        int iterator = 500;
         // 用于记录上一轮迭代的损失函数
         BigDecimal lastLoss = new BigDecimal(Double.MAX_VALUE);
         // 用于记录损失函数的最小值，作为终止条件
@@ -425,6 +425,7 @@ public class LinearRegression {
         }
 
         double SSE = 0.0, SST = 0.0;
+        double MAE = 0.0;
         for (int count = 0; count < X.length; count++) {
             double[] curX = X[count];
             double curY = Y[count];
@@ -434,10 +435,11 @@ public class LinearRegression {
             }
             SSE += Math.pow((curY - cal), 2);
             SST += Math.pow((curY - averageY), 2);
+            MAE += 1.0 / X.length * Math.abs(curY - cal);
         }
         double R2 = 1.0 - SSE / SST;
-        System.out.println("R^2 =" + R2);//R^2 =0.7282359232308551
-
+//        System.out.println("R^2 =" + R2);//R^2 =0.7282359232308551
+        System.out.println("MAE = " + MAE);
     }
 
     private static BigDecimal iteritor(BigDecimal gradient, BigDecimal size, BigDecimal loss, BigDecimal x) {
