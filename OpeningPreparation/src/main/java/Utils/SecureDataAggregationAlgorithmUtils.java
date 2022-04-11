@@ -183,7 +183,7 @@ public class SecureDataAggregationAlgorithmUtils {
         BigInteger N = pp.getN();
         BigInteger Nsquare = N.multiply(N);
         BigInteger lamda = sk_csp.getLamda(), miu = sk_csp.getMiu(), gama = sk_csp.getGama();
-        // x = (L([[x]]^γ mod N^2 ·μ)mod N) mod γ = (L([[x]]^γ mod N^2 ·μ)- γ∑ri)mod N)\
+        // x = (L([[x]]^γ mod N^2 ·μ)mod N) mod γ = (L([[x]]^γ mod N^2 ·μ)- γ∑ri)mod N
         return (BigIntegerUtils.functionL(x.modPow(lamda, Nsquare).multiply(miu), N).subtract(ri.multiply(gama))).mod(N);
     }
 }
