@@ -131,3 +131,5 @@
     * 回归训练
 * 4/11
     * 计算 calculate cost
+* 4/12
+    * 计算 Communication overhead
