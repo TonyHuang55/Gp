@@ -82,14 +82,6 @@ public class test {
                 add(res2.get(0));
             }
         };
-        for (int i = 0; i < M.size(); i++) {
-            BigInteger[][] o = (BigInteger[][])M.get(i);
-            for (int j = 0; j < o.length; j++) {
-                for (int k = 0; k < o[0].length; k++) {
-                    System.out.println(o[j][k].bitLength());
-                }
-            }
-        }
 
         List R = new ArrayList<BigInteger[][]>() {
             {

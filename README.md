@@ -133,3 +133,6 @@
     * 计算 calculate cost
 * 4/12
     * 计算 Communication overhead
+* 4/13
+    * 整合 calculate cost & Communication overhead
+    * 查阅提高 paillier 加解密效率相关文献
