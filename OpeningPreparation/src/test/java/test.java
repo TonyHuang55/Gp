@@ -56,21 +56,21 @@ public class test {
         dataOwners[0].dataPreprocessing();
         dataOwners[1].dataPreprocessing();
 
-        System.out.println("聚合明文结果：");
-        Double[][] m1 = dataOwners[0].getM();
-        Double[][] m2 = dataOwners[1].getM();
-        int[][] m = new int[m1.length][m1.length];
-        for (int i = 0; i < m1.length; i++) {
-            for (int j = 0; j < m1[0].length; j++) {
-                m[i][j] = (int) Math.floor(m1[i][j] * 1000) + (int) Math.floor(m2[i][j] * 1000);
-            }
-        }
-        for (int i = 0; i < m.length; i++) {
-            for (int j = 0; j < m.length; j++) {
-                System.out.print(m[i][j] + " ");
-            }
-            System.out.println();
-        }
+//        System.out.println("聚合明文结果：");
+//        Double[][] m1 = dataOwners[0].getM();
+//        Double[][] m2 = dataOwners[1].getM();
+//        int[][] m = new int[m1.length][m1.length];
+//        for (int i = 0; i < m1.length; i++) {
+//            for (int j = 0; j < m1[0].length; j++) {
+//                m[i][j] = (int) Math.floor(m1[i][j] * 1000) + (int) Math.floor(m2[i][j] * 1000);
+//            }
+//        }
+//        for (int i = 0; i < m.length; i++) {
+//            for (int j = 0; j < m.length; j++) {
+//                System.out.print(m[i][j] + " ");
+//            }
+//            System.out.println();
+//        }
         System.out.println("=============================================");
 
         List<BigInteger[][]> res1 = dataOwners[0].localTrainingDataEncryption((PublicParameters) pp[0], (SK_DO) sk_dos[0]);

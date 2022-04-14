@@ -136,3 +136,5 @@
 * 4/13
     * 整合 calculate cost & Communication overhead
     * 查阅提高 paillier 加解密效率相关文献
+* 4/14
+    * 提高 paillier 加解密效率有局限性，本实验中由于聚合和安全原因不易实现
