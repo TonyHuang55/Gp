@@ -13,90 +13,90 @@ import java.util.Arrays;
 import java.util.List;
 
 public class LinearRegression {
-    @Test
-    public void test1() throws IOException {
-        String localURL = "src/main/resources/database/house_data.csv";
-        FileReader fileReader = new FileReader(localURL);
-        String combineHeaders = new BufferedReader(new FileReader(localURL)).readLine();
-        String[] headers = combineHeaders.split(",");
-//        for (int i = 0; i < headers.length; i++) {
-//            String tmp = headers[i];
-//            headers[i] = tmp.substring(1, tmp.length() - 1);
+//    @Test
+//    public void test1() throws IOException {
+//        String localURL = "src/main/resources/database/house_data.csv";
+//        FileReader fileReader = new FileReader(localURL);
+//        String combineHeaders = new BufferedReader(new FileReader(localURL)).readLine();
+//        String[] headers = combineHeaders.split(",");
+////        for (int i = 0; i < headers.length; i++) {
+////            String tmp = headers[i];
+////            headers[i] = tmp.substring(1, tmp.length() - 1);
+////        }
+//        CSVFormat format = CSVFormat.EXCEL.withHeader(headers).withDelimiter(',');
+//        CSVParser parser = new CSVParser(fileReader, format);
+//        List<CSVRecord> totalData = parser.getRecords();
+//        double[][] x = new double[totalData.size() - 1][13];
+//        double[] y = new double[totalData.size() - 1];
+//        for (int count = 1; count < totalData.size(); count++) {
+//            CSVRecord record = totalData.get(count);
+//            for (int d = 0; d < record.size() - 1; d++) {
+//                x[count - 1][d] = (Double.parseDouble(record.get(d)));
+//            }
+//            y[count - 1] = (Double.parseDouble(record.get(record.size() - 1)));
 //        }
-        CSVFormat format = CSVFormat.EXCEL.withHeader(headers).withDelimiter(',');
-        CSVParser parser = new CSVParser(fileReader, format);
-        List<CSVRecord> totalData = parser.getRecords();
-        double[][] x = new double[totalData.size() - 1][13];
-        double[] y = new double[totalData.size() - 1];
-        for (int count = 1; count < totalData.size(); count++) {
-            CSVRecord record = totalData.get(count);
-            for (int d = 0; d < record.size() - 1; d++) {
-                x[count - 1][d] = (Double.parseDouble(record.get(d)));
-            }
-            y[count - 1] = (Double.parseDouble(record.get(record.size() - 1)));
-        }
-
-
-        OLSMultipleLinearRegression regression = new OLSMultipleLinearRegression();
-
-        regression.newSampleData(y, x);
-
-        double[] doubles = regression.estimateRegressionParameters();
-        for (double aDouble : doubles) {
-            System.out.println(aDouble);
-        }
-
-        int c = 0;//653
-        for (int count = 0; count < x.length; count++) {
-            double[] x1 = x[count];
-            double y1 = y[count];
-            double cal = doubles[0];
-            for (int i = 0; i < x1.length; i++) {
-                cal += doubles[i + 1] * x1[i];
-            }
-            cal = Math.round(cal);
-            if (cal != y1) {
-                c++;
-            }
-//            System.out.println("回归结果为：" + cal + ",实际结果为：" + y1);
-        }
-        double rate1 = (506.0 - c) / 506.0;
-        System.out.println("调包训练结果正确率：" + rate1);
-
-//        int c1 = 0;//971
-//        double[] doubles1 = {
-//                0.893713663898845514680373954587679,
-//                0.018969579787319297522742306666234,
-//                0.937489429299001823145834369383443,
-//                0.967655980007482041172810789505129,
-//                0.561695595591187104952198139457453,
-//                0.988851272946083723180589020978109,
-//                0.006456545570517347442260018332228,
-//                -0.01197973134045061305633652537780,
-//                0.893882570508861651299330427875804,
-//                0.649855547611949487197998246734840,
-//                0.931070066159703380903139968660764,
-//                -0.08493077764696144878073784076785};
+//
+//
+//        OLSMultipleLinearRegression regression = new OLSMultipleLinearRegression();
+//
+//        regression.newSampleData(y, x);
+//
+//        double[] doubles = regression.estimateRegressionParameters();
+//        for (double aDouble : doubles) {
+//            System.out.println(aDouble);
+//        }
+//
+//        int c = 0;//653
 //        for (int count = 0; count < x.length; count++) {
 //            double[] x1 = x[count];
 //            double y1 = y[count];
-//            double cal = doubles1[0];
+//            double cal = doubles[0];
 //            for (int i = 0; i < x1.length; i++) {
-//                cal += doubles1[i + 1] * x1[i];
+//                cal += doubles[i + 1] * x1[i];
 //            }
 //            cal = Math.round(cal);
 //            if (cal != y1) {
-//                c1++;
+//                c++;
 //            }
 ////            System.out.println("回归结果为：" + cal + ",实际结果为：" + y1);
 //        }
-//        double rate2 = (1599.0 - c1) / 1599.0;
-//        System.out.println("自主训练结果正确率：" + rate2);
-
-    }
+//        double rate1 = (506.0 - c) / 506.0;
+//        System.out.println("调包训练结果正确率：" + rate1);
+//
+////        int c1 = 0;//971
+////        double[] doubles1 = {
+////                0.893713663898845514680373954587679,
+////                0.018969579787319297522742306666234,
+////                0.937489429299001823145834369383443,
+////                0.967655980007482041172810789505129,
+////                0.561695595591187104952198139457453,
+////                0.988851272946083723180589020978109,
+////                0.006456545570517347442260018332228,
+////                -0.01197973134045061305633652537780,
+////                0.893882570508861651299330427875804,
+////                0.649855547611949487197998246734840,
+////                0.931070066159703380903139968660764,
+////                -0.08493077764696144878073784076785};
+////        for (int count = 0; count < x.length; count++) {
+////            double[] x1 = x[count];
+////            double y1 = y[count];
+////            double cal = doubles1[0];
+////            for (int i = 0; i < x1.length; i++) {
+////                cal += doubles1[i + 1] * x1[i];
+////            }
+////            cal = Math.round(cal);
+////            if (cal != y1) {
+////                c1++;
+////            }
+//////            System.out.println("回归结果为：" + cal + ",实际结果为：" + y1);
+////        }
+////        double rate2 = (1599.0 - c1) / 1599.0;
+////        System.out.println("自主训练结果正确率：" + rate2);
+//
+//    }
 
     @Test
-    public void test2() throws IOException {
+    public void wine() throws IOException {
         String localURL = "src/main/resources/database/winequality-red.csv";
         FileReader fileReader = new FileReader(localURL);
         String combineHeaders = new BufferedReader(new FileReader(localURL)).readLine();
@@ -140,16 +140,16 @@ public class LinearRegression {
     }
 
     @Test
-    public void test3() throws IOException {
+    public void house() throws IOException {
         String localURL = "src/main/resources/database/house_data.csv";
         FileReader fileReader = new FileReader(localURL);
         String combineHeaders = new BufferedReader(new FileReader(localURL)).readLine();
-        String[] headers = combineHeaders.split(",");
+        String[] headers = combineHeaders.split(";");
 //        for (int i = 0; i < headers.length; i++) {
 //            String tmp = headers[i];
 //            headers[i] = tmp.substring(1, tmp.length() - 1);
 //        }
-        CSVFormat format = CSVFormat.EXCEL.withHeader(headers).withDelimiter(',');
+        CSVFormat format = CSVFormat.EXCEL.withHeader(headers).withDelimiter(';');
         CSVParser parser = new CSVParser(fileReader, format);
         List<CSVRecord> totalData = parser.getRecords();
         double[][] x = new double[totalData.size() - 1][13];
@@ -280,11 +280,6 @@ public class LinearRegression {
     }
 
     public static void LR(double[][] X, double[] Y) {
-        double averageY = 0.0;
-        for (double cury : Y) {
-            averageY += cury;
-        }
-        averageY = averageY / Y.length;
         // α ：学习率
         BigDecimal learning_rate = new BigDecimal("0.1");
         // a为常数项，a0 ~ a10 是因子的系数项
@@ -420,11 +415,13 @@ public class LinearRegression {
 
         System.out.println("====================================================");
 
-        for (BigDecimal re : a) {
-            System.out.println(re);
+        System.out.println("训练模型为：");
+        for (int j = 0; j < a.length; j++) {
+            System.out.print("a" + j + " = " + a[j].setScale(5, BigDecimal.ROUND_HALF_UP));
+            System.out.print("     ");
+            if (j % 3 == 2) { System.out.println(); }
         }
 
-        double SSE = 0.0, SST = 0.0;
         double MAE = 0.0;
         for (int count = 0; count < X.length; count++) {
             double[] curX = X[count];
@@ -433,13 +430,9 @@ public class LinearRegression {
             for (int i = 0; i < curX.length; i++) {
                 cal += a[i + 1].doubleValue() * curX[i];
             }
-            SSE += Math.pow((curY - cal), 2);
-            SST += Math.pow((curY - averageY), 2);
             MAE += 1.0 / X.length * Math.abs(curY - cal);
         }
-        double R2 = 1.0 - SSE / SST;
-//        System.out.println("R^2 =" + R2);//R^2 =0.7282359232308551
-        System.out.println("MAE = " + MAE);
+        System.out.println("平均绝对误差MAE = " + MAE);
     }
 
     private static BigDecimal iteritor(BigDecimal gradient, BigDecimal size, BigDecimal loss, BigDecimal x) {

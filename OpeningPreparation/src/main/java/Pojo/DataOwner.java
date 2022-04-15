@@ -48,9 +48,9 @@ public class DataOwner {
         FileReader fileReader = new FileReader(localURL);
         // 2.读取 csv 文件第一行标题
         String combineHeaders = new BufferedReader(new FileReader(localURL)).readLine();
-        String[] headers = combineHeaders.split(",");
+        String[] headers = combineHeaders.split(";");
         // 3.CSVFormat 解析，采用 EXCEL 枚举，标题为读取到的第一行分割标题，分割符为 `,`
-        CSVFormat format = CSVFormat.EXCEL.withHeader(headers).withDelimiter(',');
+        CSVFormat format = CSVFormat.EXCEL.withHeader(headers).withDelimiter(';');
         // 4.读取数据
         CSVParser parser = new CSVParser(fileReader, format);
         totalData = parser.getRecords();
