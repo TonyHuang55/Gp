@@ -8,6 +8,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
+import javax.xml.crypto.Data;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -39,10 +40,18 @@ public class DataOwner {
 
         List<Double> maxFeature = DataNormalizationUtils.maxCalculate(featureVector);
         List<Double> minFeature = DataNormalizationUtils.minCalculate(featureVector);
+        Double maxTarget = DataNormalizationUtils.maxTarget(targetVariable);
+        Double minTarget = DataNormalizationUtils.minTarget(targetVariable);
 
-        return new List[]{maxFeature, minFeature, Collections.singletonList((totalData.size() - 1))};
+        return new List[]{maxFeature, minFeature, Collections.singletonList((totalData.size() - 1)), Arrays.asList(maxTarget, minTarget)};
     }
 
+    /**
+     * 读取 csv 文件
+     *
+     * @param localURL
+     * @throws IOException
+     */
     private void read(String localURL) throws IOException {
         // 1.配置数据路径，读取数据文件
         FileReader fileReader = new FileReader(localURL);
@@ -68,6 +77,13 @@ public class DataOwner {
             for (int j = 0; j < list.size(); j++) {
                 list.set(j, (list.get(j) - min.get(j)) / (max.get(j) - min.get(j)));
             }
+        }
+    }
+
+    public void localTargetNormalize(List<Double> M) {
+        for (int i = 0; i < targetVariable.size(); i++) {
+            Double target = targetVariable.get(i);
+            targetVariable.set(i, (target - M.get(1)) / (M.get(0) - M.get(1)));
         }
     }
 

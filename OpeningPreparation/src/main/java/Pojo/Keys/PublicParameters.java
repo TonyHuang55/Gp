@@ -10,6 +10,7 @@ import java.math.BigInteger;
 public class PublicParameters extends Keys{
     /**
      * security parameter
+     * 本例中为 2048
      */
     public int kapa;
 

@@ -55,11 +55,9 @@ public class LinearRegressionUtils {
 
             lossFunc = totalLoss.divide(new BigDecimal(2 * n), 4);
             BigDecimal derta = lastLoss.subtract(lossFunc);
-//            System.out.println(derta);
             if (lossFunc.compareTo(minLoss) < 0) {
                 minLoss = lossFunc;
             }
-//            System.out.println("第" + (i + 1) + "轮：" + lossFunc);
             if (lossFunc.compareTo(minLoss) > 0 || derta.abs().compareTo(new BigDecimal("0.001")) < 0) {
                 break;
             } else {
@@ -73,6 +71,7 @@ public class LinearRegressionUtils {
             System.out.print("     ");
             if (j % 3 == 2) { System.out.println(); }
         }
+        System.out.println();
 
         return a;
     }

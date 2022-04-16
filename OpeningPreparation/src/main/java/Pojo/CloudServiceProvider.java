@@ -24,7 +24,7 @@ public class CloudServiceProvider {
                 fin[i][j] = new BigInteger("1");
             }
         }
-        // 聚合
+        // 聚合，做哈达玛积
         for (int n = 0; n < M.size(); n++) {
             BigInteger[][] multiply = M.get(n);
             for (int i = 0; i < d; i++) {
@@ -41,8 +41,8 @@ public class CloudServiceProvider {
                 BigInteger cur = fin[i][j];
                 cur = SecureDataAggregationAlgorithmUtils.DataAggregation(cur, pp);
                 BigInteger ri = new BigInteger("0");
-                for (int k = 0; k < R.size(); k++) {
-                    ri=ri.add(R.get(k)[i][j]);
+                for (BigInteger[][] r : R) {
+                    ri = ri.add(r[i][j]);
                 }
                 fin[i][j] = SecureDataAggregationAlgorithmUtils.AggregatedResultDecryption(cur, pp, sk_csp, ri);
             }
