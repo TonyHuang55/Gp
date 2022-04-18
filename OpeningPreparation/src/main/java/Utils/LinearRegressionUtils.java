@@ -5,16 +5,16 @@ import java.math.BigInteger;
 import java.util.Arrays;
 
 public class LinearRegressionUtils {
-    public static BigDecimal[] LR(BigInteger[][] M, int n) {
+    public static BigDecimal[] LR(BigInteger[][] M, int n,BigDecimal[] a) {
         // α ：学习率
         BigDecimal learning_rate = new BigDecimal("0.000001");
         // a为常数项，a0 ~ a12 是因子的系数项
         // 权重初始值全都为 1
-        BigDecimal[] a = new BigDecimal[M.length];
-        Arrays.fill(a, new BigDecimal("1"));
+//        BigDecimal[] a = new BigDecimal[M.length];
+//        Arrays.fill(a, new BigDecimal("1"));
 
         // 迭代次数
-        int iterator = 1000;
+        int iterator = 500;
         int i = 0;
         // 用于记录上一轮迭代的损失函数
         BigDecimal lastLoss = new BigDecimal(Double.MAX_VALUE);
@@ -69,7 +69,9 @@ public class LinearRegressionUtils {
         for (int j = 0; j < a.length; j++) {
             System.out.print("a" + j + " = " + a[j].setScale(5, BigDecimal.ROUND_HALF_UP));
             System.out.print("     ");
-            if (j % 3 == 2) { System.out.println(); }
+            if (j % 3 == 2) {
+                System.out.println();
+            }
         }
         System.out.println();
 
