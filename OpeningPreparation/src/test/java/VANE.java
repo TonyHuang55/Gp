@@ -27,10 +27,7 @@ public class VANE {
     public void house() throws Exception {
         List<String> urls = Arrays.asList("src/main/resources/database/house_data.csv",
                 "src/main/resources/database/house_data.csv");
-        BigDecimal[] a = VANETest(urls);
-        List<String> newUrls = new ArrayList<>(urls);
-        newUrls.add("src/main/resources/database/house_data.csv");
-        updateByAddDOs(a, newUrls);
+        VANETest(urls);
     }
 
     private static BigDecimal[] VANETest(List<String> urls) throws Exception {
