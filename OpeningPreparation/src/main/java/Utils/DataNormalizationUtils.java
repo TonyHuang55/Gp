@@ -5,7 +5,7 @@ import java.util.List;
 
 public class DataNormalizationUtils {
     /**
-     * 求最大值
+     * 特征向量求最大值
      *
      * @param lists
      * @return
@@ -24,7 +24,7 @@ public class DataNormalizationUtils {
     }
 
     /**
-     * 求最小值
+     * 特征向量求最小值
      *
      * @param lists
      * @return
@@ -43,7 +43,7 @@ public class DataNormalizationUtils {
     }
 
     /**
-     * 求最大值
+     * 目标变量求最大值
      *
      * @param lists
      * @return
@@ -60,7 +60,7 @@ public class DataNormalizationUtils {
     }
 
     /**
-     * 求最小值
+     * 目标变量求最小值
      *
      * @param lists
      * @return

@@ -7,7 +7,7 @@ import java.math.BigInteger;
 
 @Data
 @AllArgsConstructor
-public class SK_CSP extends Keys{
+public class SK_CSP extends Keys {
     /**
      * Paillier 私钥
      */
@@ -20,4 +20,12 @@ public class SK_CSP extends Keys{
      * satisfying |γ| < κ/2 and gcd(k,γ) = 1
      */
     public BigInteger gama;
+
+    @Override
+    public String toString() {
+        return "SK_CSP:" + "\n" +
+                "lamda = " + lamda + "\n" +
+                "miu = " + miu + "\n" +
+                "gama = " + gama + "\n";
+    }
 }

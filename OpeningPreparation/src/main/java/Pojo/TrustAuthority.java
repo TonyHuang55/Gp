@@ -9,7 +9,7 @@ import java.util.*;
 
 public class TrustAuthority {
     /**
-     * keyGenerate
+     * 密钥生成
      *
      * @param m DOs 的数量
      * @return
@@ -19,10 +19,10 @@ public class TrustAuthority {
     }
 
     /**
-     * 计算各个维度的最值 & disturbs
+     * 计算各个维度的最值 & 扰乱最值
      *
-     * @param DOs
-     * @return
+     * @param DOs DOs
+     * @return 最值向量集合
      */
     public List[] globalDataNormalization(List<List[]> DOs) {
         List<List<Double>> max = new ArrayList<>();
@@ -48,7 +48,7 @@ public class TrustAuthority {
             minFeature.set(i, BigDecimal.valueOf(minFeature.get(i)).subtract(BigDecimal.valueOf(new Random().nextDouble()).setScale(2, BigDecimal.ROUND_HALF_UP)).doubleValue());
         }
 
-        return new List[]{maxFeature, minFeature, Collections.singletonList(n),Arrays.asList(maxTarget,minTarget)};
+        return new List[]{maxFeature, minFeature, Collections.singletonList(n), Arrays.asList(maxTarget, minTarget)};
     }
 
 }

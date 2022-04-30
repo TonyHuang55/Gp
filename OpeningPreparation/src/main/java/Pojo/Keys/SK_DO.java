@@ -7,7 +7,7 @@ import java.math.BigInteger;
 
 @Data
 @AllArgsConstructor
-public class SK_DO extends Keys{
+public class SK_DO extends Keys {
     /**
      * R_t —— a random number as the task ID for every data aggregation task
      * n_i —— splits N into m random numbers{n_1,n_2...n_m}

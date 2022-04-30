@@ -8,7 +8,6 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
-import javax.xml.crypto.Data;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -16,11 +15,30 @@ import java.math.BigInteger;
 import java.util.*;
 
 public class DataOwner {
+    /**
+     * 数据集原始数据
+     */
     private List<CSVRecord> totalData;
+    /**
+     * 特征向量集合
+     */
     private List<List<Double>> featureVector;
+    /**
+     * 目标变量集合
+     */
     private List<Double> targetVariable;
+    /**
+     * 归一化矩阵
+     */
     private Double[][] M;
 
+    /**
+     * 统计最值向量
+     *
+     * @param localURL 本地数据集路径
+     * @return 传输给 CSP 的最值向量
+     * @throws IOException 文件读取异常
+     */
     public List[] dataNormalization(String localURL) throws IOException {
         read(localURL);
 
@@ -49,8 +67,8 @@ public class DataOwner {
     /**
      * 读取 csv 文件
      *
-     * @param localURL
-     * @throws IOException
+     * @param localURL 本地数据集路径
+     * @throws IOException 文件读取异常
      */
     private void read(String localURL) throws IOException {
         // 1.配置数据路径，读取数据文件
@@ -66,10 +84,10 @@ public class DataOwner {
     }
 
     /**
-     * 归一化
+     * 特征向量归一化
      *
-     * @param max
-     * @param min
+     * @param max 全局最大值向量
+     * @param min 全局最小值向量
      */
     public void localFeatureVectorNormalize(List<Double> max, List<Double> min) {
         for (int i = 0; i < featureVector.size(); i++) {
@@ -80,6 +98,11 @@ public class DataOwner {
         }
     }
 
+    /**
+     * 目标变量归一化
+     *
+     * @param M 全局最值变量
+     */
     public void localTargetNormalize(List<Double> M) {
         for (int i = 0; i < targetVariable.size(); i++) {
             Double target = targetVariable.get(i);
@@ -88,7 +111,7 @@ public class DataOwner {
     }
 
     /**
-     * 生成矩阵
+     * 生成聚合矩阵
      */
     public void dataPreprocessing() {
         int d = featureVector.get(0).size();
@@ -120,6 +143,11 @@ public class DataOwner {
         }
     }
 
+    /**
+     * 获取矩阵
+     *
+     * @return
+     */
     public Double[][] getM() {
         return M;
     }
@@ -127,26 +155,20 @@ public class DataOwner {
     /**
      * 加密
      *
-     * @param pp
-     * @param sk_do
-     * @return
+     * @param pp    公共参数
+     * @param sk_do DOs密钥
+     * @return 加密后的聚合矩阵
      */
-    public List<BigInteger[][]> localTrainingDataEncryption(PublicParameters pp, SK_DO sk_do) {
+    public BigInteger[][] localTrainingDataEncryption(PublicParameters pp, SK_DO sk_do) {
         int d = M.length - 1;
         BigInteger[][] Mi = new BigInteger[M.length][M.length];
-        BigInteger[][] Ri = new BigInteger[M.length][M.length];
         for (int i = 0; i <= d; i++) {
             for (int j = 0; j <= d; j++) {
                 String integer = String.valueOf(Math.floor(M[i][j] * 1000));
                 BigInteger m = new BigInteger(integer.substring(0, integer.indexOf('.')));
-                BigInteger[] res = SecureDataAggregationAlgorithmUtils.DataEncryption(m, pp, sk_do);
-                Mi[i][j] = res[0];
-                Ri[i][j] = res[1];
+                Mi[i][j] = SecureDataAggregationAlgorithmUtils.DataEncryption(m, pp, sk_do);
             }
         }
-        return new ArrayList<BigInteger[][]>() {{
-            add(Mi);
-            add(Ri);
-        }};
+        return Mi;
     }
 }

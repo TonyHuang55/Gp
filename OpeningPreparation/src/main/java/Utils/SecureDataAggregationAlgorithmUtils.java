@@ -18,7 +18,7 @@ public class SecureDataAggregationAlgorithmUtils {
     private final static int kapa = 1024;
 
     /**
-     * keyGenerate
+     * 密钥生成
      *
      * @param m DOs 的数量
      * @return
@@ -82,6 +82,8 @@ public class SecureDataAggregationAlgorithmUtils {
 
     /**
      * paillier 加密得到公钥和私钥
+     *
+     * @return
      */
     private static HashMap<String, BigInteger[]> paillierKeyGeneration() {
         // BigInteger(int bitLength ,int certainty ,Random rnd)
@@ -131,13 +133,14 @@ public class SecureDataAggregationAlgorithmUtils {
     }
 
     /**
-     * DataEncryption
+     * 加密
+     *
      * @param x     明文
      * @param pp    pp
      * @param sk_do sk_do
      * @return
      */
-    public static BigInteger[] DataEncryption(BigInteger x, PublicParameters pp, SK_DO sk_do) {
+    public static BigInteger DataEncryption(BigInteger x, PublicParameters pp, SK_DO sk_do) {
         BigInteger N = pp.getN(), g = pp.getG(), h = pp.getH();
         BigInteger Nsquare = N.multiply(N);
         // a random number which satisfies |r_i| < κ/2
@@ -147,22 +150,14 @@ public class SecureDataAggregationAlgorithmUtils {
         } while (bl == 1);
         BigInteger r = new BigInteger(bl, certainty, new Random());
         // [[x(i)]] = g^x(i) · h^ri · SK_DOi mod N^2
-        BigInteger c = g.modPow(x, Nsquare).multiply(h.modPow(r, Nsquare)).multiply(sk_do.getSK_DOi()).mod(Nsquare);
-        /**
-         * 注：
-         * 解密时 mod N mod γ，因为|γ|＜κ/2 所以最后模γ后 x 是不可能超过它的，而原始明文空间的 x 是在 Z_N 中的。
-         * 如果 x 是一个介于γ和N之间的数，恢复出来的就不对
-         *
-         * 这里把 mod N mod γ 改为 => - γ∑ri mod N
-         * 故需要传参 ri
-         */
-        return new BigInteger[]{c, r};
+        return g.modPow(x, Nsquare).multiply(h.modPow(r, Nsquare)).multiply(sk_do.getSK_DOi()).mod(Nsquare);
     }
 
     /**
-     * DataAggregation
-     * @param x     密文
-     * @param pp    pp
+     * 聚合
+     *
+     * @param x  密文
+     * @param pp pp
      * @return
      */
     public static BigInteger DataAggregation(BigInteger x, PublicParameters pp) {
@@ -172,18 +167,39 @@ public class SecureDataAggregationAlgorithmUtils {
     }
 
     /**
-     * AggregatedResultDecryption
-     * @param x         密文
-     * @param pp        pp
-     * @param sk_csp    sk_csp
-     * @param ri        随机数 ri
+     * 解密
+     *
+     * @param x      密文
+     * @param pp     pp
+     * @param sk_csp sk_csp
      * @return
      */
-    public static BigInteger AggregatedResultDecryption(BigInteger x, PublicParameters pp, SK_CSP sk_csp,BigInteger ri) {
+    public static BigInteger AggregatedResultDecryption(BigInteger x, PublicParameters pp, SK_CSP sk_csp) {
         BigInteger N = pp.getN();
         BigInteger Nsquare = N.multiply(N);
         BigInteger lamda = sk_csp.getLamda(), miu = sk_csp.getMiu(), gama = sk_csp.getGama();
         // x = (L([[x]]^γ mod N^2 ·μ)mod N) mod γ = (L([[x]]^γ mod N^2 ·μ)- γ∑ri)mod N
-        return (BigIntegerUtils.functionL(x.modPow(lamda, Nsquare).multiply(miu), N).subtract(ri.multiply(gama))).mod(N);
+//        return (BigIntegerUtils.functionL(x.modPow(lamda, Nsquare).multiply(miu), N).subtract(ri.multiply(gama))).mod(N);
+        return (BigIntegerUtils.functionL(x.modPow(lamda, Nsquare).multiply(miu), N)).mod(N).mod(gama);
+    }
+
+    /**
+     * 更新 gama
+     *
+     * @param pp     公共参数
+     * @param sk_csp CSP密钥
+     * @param maxLen bitlength下限
+     */
+    public static void renew(PublicParameters pp, SK_CSP sk_csp, Integer maxLen) {
+        BigInteger gama = null;
+        do {
+            int bl;
+            do {
+                bl = new Random().nextInt(kapa / 2 - 1) + 1;
+            } while (bl == 1);
+            gama = new BigInteger(bl, certainty, new Random());
+        } while (gama.bitLength() <= maxLen);
+        sk_csp.setGama(gama);
+        pp.setH(pp.getG().modPow(gama, pp.getN().multiply(pp.getN())));
     }
 }

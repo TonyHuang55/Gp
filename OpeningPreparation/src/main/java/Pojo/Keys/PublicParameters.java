@@ -7,7 +7,7 @@ import java.math.BigInteger;
 
 @Data
 @AllArgsConstructor
-public class PublicParameters extends Keys{
+public class PublicParameters extends Keys {
     /**
      * security parameter
      * 本例中为 2048
@@ -27,4 +27,13 @@ public class PublicParameters extends Keys{
      * h = g^γ mod N^2
      */
     public BigInteger h;
+
+    @Override
+    public String toString() {
+        return "PublicParameters:" + "\n" +
+                "kapa = " + kapa + "\n" +
+                "N = " + N + "\n" +
+                "g = " + g + "\n" +
+                "h = " + h + "\n";
+    }
 }

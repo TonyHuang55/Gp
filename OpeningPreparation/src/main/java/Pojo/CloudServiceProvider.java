@@ -18,15 +18,13 @@ import static java.math.BigDecimal.ZERO;
 
 public class CloudServiceProvider {
     /**
-     * 聚合并解密
+     * 将 m 个矩阵聚合
      *
-     * @param M
-     * @param pp
-     * @param sk_csp
-     * @param R
-     * @return
+     * @param M  矩阵 List
+     * @param pp 公共参数
+     * @return 聚合后的矩阵
      */
-    public BigInteger[][] localTrainingDataAggregation(List<BigInteger[][]> M, PublicParameters pp, SK_CSP sk_csp, List<BigInteger[][]> R) {
+    public BigInteger[][] localTrainingDataAggregation(List<BigInteger[][]> M, PublicParameters pp) {
         int d = M.get(0).length;
         BigInteger[][] fin = new BigInteger[d][d];
         for (int i = 0; i < d; i++) {
@@ -34,9 +32,8 @@ public class CloudServiceProvider {
                 fin[i][j] = new BigInteger("1");
             }
         }
-        // 聚合，做哈达玛积
-        for (int n = 0; n < M.size(); n++) {
-            BigInteger[][] multiply = M.get(n);
+        // 做哈达玛积
+        for (BigInteger[][] multiply : M) {
             for (int i = 0; i < d; i++) {
                 for (int j = 0; j < d; j++) {
                     BigInteger cur = fin[i][j];
@@ -44,22 +41,42 @@ public class CloudServiceProvider {
                 }
             }
         }
-
-        // 解密
+        // 聚合
         for (int i = 0; i < d; i++) {
             for (int j = 0; j < d; j++) {
-                BigInteger cur = fin[i][j];
-                cur = SecureDataAggregationAlgorithmUtils.DataAggregation(cur, pp);
-                BigInteger ri = new BigInteger("0");
-                for (BigInteger[][] r : R) {
-                    ri = ri.add(r[i][j]);
-                }
-                fin[i][j] = SecureDataAggregationAlgorithmUtils.AggregatedResultDecryption(cur, pp, sk_csp, ri);
+                fin[i][j] = SecureDataAggregationAlgorithmUtils.DataAggregation(fin[i][j], pp);
             }
         }
         return fin;
     }
 
+    /**
+     * 对聚合矩阵解密
+     *
+     * @param fin    聚合矩阵
+     * @param pp     公共参数
+     * @param sk_csp CSP秘钥
+     * @return 聚合明文
+     */
+    public BigInteger[][] trainAggregatedResultDecryption(BigInteger[][] fin, PublicParameters pp, SK_CSP sk_csp) {
+        int d = fin.length;
+        // 解密
+        for (int i = 0; i < d; i++) {
+            for (int j = 0; j < d; j++) {
+                fin[i][j] = SecureDataAggregationAlgorithmUtils.AggregatedResultDecryption(fin[i][j], pp, sk_csp);
+            }
+        }
+        return fin;
+    }
+
+    /**
+     * 模型评估
+     *
+     * @param url 测试数据集路径
+     * @param a   回归模型的回归系数
+     * @return 残差平方和
+     * @throws Exception 文件读取异常
+     */
     public static BigDecimal ModelEstimation(String url, BigDecimal[] a) throws Exception {
         // 1.配置数据路径，读取数据文件
         FileReader fileReader = new FileReader(url);

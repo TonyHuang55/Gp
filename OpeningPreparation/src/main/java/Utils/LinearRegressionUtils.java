@@ -2,17 +2,19 @@ package Utils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Arrays;
 
 public class LinearRegressionUtils {
-    public static BigDecimal[] LR(BigInteger[][] M, int n,BigDecimal[] a) {
+    /**
+     * 线性回归训练
+     *
+     * @param M 聚合矩阵
+     * @param n 样本总数
+     * @param a 回归参数初值
+     * @return
+     */
+    public static BigDecimal[] LR(BigInteger[][] M, int n, BigDecimal[] a) {
         // α ：学习率
         BigDecimal learning_rate = new BigDecimal("0.000001");
-        // a为常数项，a0 ~ a12 是因子的系数项
-        // 权重初始值全都为 1
-//        BigDecimal[] a = new BigDecimal[M.length];
-//        Arrays.fill(a, new BigDecimal("1"));
-
         // 迭代次数
         int iterator = 500;
         int i = 0;
