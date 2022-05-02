@@ -64,7 +64,7 @@ public class Paillier {
      * Constructs an instance of the ref.Paillier cryptosystem with 512 bits of modulus and at least 1-2^(-64) certainty of primes generation.
      */
     public Paillier() {
-        KeyGeneration(512, 64);
+        KeyGeneration(1024, 64);
     }
 
     /**
