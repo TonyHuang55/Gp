@@ -5,11 +5,12 @@ import java.util.HashMap;
 import java.util.Random;
 
 import static java.math.BigInteger.ONE;
+import static java.math.BigInteger.ZERO;
 
 public class PaillierRSAComp {
     public static void main(String[] args) {
         for (int j = 1; j <= 20; j++) {
-            System.out.println("第"+j+"轮：");
+            System.out.println("第" + j + "轮：");
             long rStart = System.currentTimeMillis();
             HashMap<String, BigInteger[]> RSAKey = RSA.KeyGeneration();
             BigInteger[] rsapk = RSAKey.get("PK");
@@ -18,13 +19,30 @@ public class PaillierRSAComp {
             System.out.println("RSA 生成密钥用时：" + (rEnd - rStart) + "ms");
 
             long rStart1 = System.currentTimeMillis();
-            for (int i = 1; i <= 100; i++) {
-                String m = i+"";
+            for (int i = 1; i <= 150; i++) {
+                String m = i + "";
                 BigInteger rc = RSA.Encryption(new BigInteger(m), rsapk);
                 BigInteger rm = RSA.Decryption(rc, rsapk, rsask);
             }
             long rEnd1 = System.currentTimeMillis();
-            System.out.println("RSA 加解密100条信息用时：" + (rEnd1 - rStart1) + "ms");
+            System.out.println("RSA 加解密150条明文用时：" + (rEnd1 - rStart1) + "ms");
+
+            BigInteger thousand1 = ONE;
+            for (int i = 1; i <= 150; i++) {
+                thousand1 = thousand1.multiply(new BigInteger(i + ""));
+            }
+            long rStart2 = System.currentTimeMillis();
+            BigInteger trc = ONE;
+            for (int i = 1; i <= 150; i++) {
+                String m = i + "";
+                BigInteger rc = RSA.Encryption(new BigInteger(m), rsapk);
+                trc = trc.multiply(rc);
+            }
+            BigInteger rm = RSA.Decryption(trc, rsapk, rsask);
+            System.out.println(rm.compareTo(thousand1) == 0 ? "有效聚合" : "无效聚合");
+            long rEnd2 = System.currentTimeMillis();
+            System.out.println("RSA 使用乘法同态加解密150条明文用时：" + (rEnd2 - rStart2) + "ms");
+
 
             long pStart = System.currentTimeMillis();
             HashMap<String, BigInteger[]> PaillierKey = Paillier.KeyGeneration();
@@ -34,13 +52,29 @@ public class PaillierRSAComp {
             System.out.println("Paillier 生成密钥用时：" + (pEnd - pStart) + "ms");
 
             long pStart1 = System.currentTimeMillis();
-            for (int i = 1; i <= 100; i++) {
+            for (int i = 1; i <= 150; i++) {
                 String m = i + "";
                 BigInteger pc = Paillier.Encryption(new BigInteger(m), ppk);
                 BigInteger pm = Paillier.Decryption(pc, ppk, psk);
             }
             long pEnd1 = System.currentTimeMillis();
-            System.out.println("Paillier 加解密100条信息用时：" + (pEnd1 - pStart1) + "ms");
+            System.out.println("Paillier 加解密150条信息用时：" + (pEnd1 - pStart1) + "ms");
+
+            BigInteger thousand2 = ZERO;
+            for (int i = 1; i <= 150; i++) {
+                thousand2 = thousand2.add(new BigInteger(i + ""));
+            }
+            long pStart2 = System.currentTimeMillis();
+            BigInteger tpc = ONE;
+            for (int i = 1; i <= 150; i++) {
+                String m = i + "";
+                BigInteger pc = Paillier.Encryption(new BigInteger(m), ppk);
+                tpc = tpc.multiply(pc);
+            }
+            BigInteger pm = Paillier.Decryption(tpc, ppk, psk);
+            System.out.println(pm.compareTo(thousand2) == 0 ? "有效聚合" : "无效聚合");
+            long pEnd2 = System.currentTimeMillis();
+            System.out.println("Paillier 使用加法同态加解密150条信息用时：" + (pEnd2 - pStart2) + "ms");
         }
     }
 }
@@ -104,8 +138,8 @@ class RSA {
 
         BigInteger e;
         do {
-            int bl= new Random().nextInt(kapa - 2) + 1;
-            e = new BigInteger(bl, certainty,new Random());
+            int bl = new Random().nextInt(kapa - 2) + 1;
+            e = new BigInteger(bl, certainty, new Random());
         } while (e.gcd(fn) == ONE && e.compareTo(ONE) > 0 && e.compareTo(fn) < 0);
 
         BigInteger d = e.modInverse(fn);
