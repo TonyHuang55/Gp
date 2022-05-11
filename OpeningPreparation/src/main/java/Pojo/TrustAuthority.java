@@ -8,6 +8,8 @@ import java.math.BigDecimal;
 import java.util.*;
 
 public class TrustAuthority {
+    private HashMap<String, Keys[]> Keys;
+
     /**
      * 密钥生成
      *
@@ -15,7 +17,13 @@ public class TrustAuthority {
      * @return
      */
     public HashMap<String, Keys[]> keyGenerate(int m) {
-        return SecureDataAggregationAlgorithmUtils.keyGenerate(m);
+        Keys = SecureDataAggregationAlgorithmUtils.keyGenerate(m);
+        return Keys;
+    }
+
+    public HashMap<String, Keys[]> updateByAddDOs(int m) {
+        Keys = SecureDataAggregationAlgorithmUtils.updateByAddDOs(Keys,m);
+        return Keys;
     }
 
     /**

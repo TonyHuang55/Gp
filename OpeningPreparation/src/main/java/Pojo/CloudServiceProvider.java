@@ -2,6 +2,7 @@ package Pojo;
 
 import Pojo.Keys.PublicParameters;
 import Pojo.Keys.SK_CSP;
+import Utils.LinearRegressionUtils;
 import Utils.SecureDataAggregationAlgorithmUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -67,6 +68,10 @@ public class CloudServiceProvider {
             }
         }
         return fin;
+    }
+
+    public BigDecimal[] LR(BigInteger[][] M, int n, BigDecimal[] a) {
+        return LinearRegressionUtils.LR(M, n, a);
     }
 
     /**

@@ -80,6 +80,28 @@ public class SecureDataAggregationAlgorithmUtils {
         }};
     }
 
+    public static HashMap<String, Keys[]> updateByAddDOs(HashMap<String, Keys[]> oldKeys,int m) {
+        Keys[] pp = oldKeys.get("PP");
+        Keys[] sk_csps = oldKeys.get("SK_CSP");
+        PublicParameters publicParameters = (PublicParameters) pp[0];
+        BigInteger N = publicParameters.getN();
+        BigInteger[] splits = splits(N, m);
+
+        BigInteger R_t = BigIntegerUtils.validRandomInResidueSystem(N);
+
+        SK_DO[] SK_DOi = new SK_DO[m];
+        for (int i = 0; i < m; i++) {
+            // SK_DOi = R_t^n_i mod N^2
+            SK_DOi[i] = new SK_DO(R_t.modPow(splits[i], N.multiply(N)));
+        }
+
+        return new HashMap<String, Keys[]>() {{
+            put("PP", pp);
+            put("SK_DO", SK_DOi);
+            put("SK_CSP", sk_csps);
+        }};
+    }
+
     /**
      * paillier 加密得到公钥和私钥
      *
